@@ -1,0 +1,991 @@
+/* ==========================================================================
+   RUNBHOOMI BOX CRICKET - HIGH-AGENCY ATHLETIC & PHYSICAL TURF SYSTEM
+   Designed with Authentic Field Turf Aesthetics:
+   - Deep Floodlit Pitch Night (#0c1017, #111827, #080d14)
+   - Real Field Turf Pitch Green (#15803d / #22c55e - Natural Grass)
+   - Chalk Boundary Crease (#f1f5f9 / rgba(255,255,255,0.12))
+   - Floodlight Amber Warmth (#f59e0b)
+   - Zero-slop athletic typography (Space Grotesk + JetBrains Mono)
+   - Tactile matchday cards with authentic turf borders & press states
+   ========================================================================== */
+
+:root {
+  /* Pitch & Stadium Neutral Palette */
+  --pitch-night: #090d14;
+  --pitch-ground: #0e141f;
+  --pitch-surface: #131c2b;
+  --pitch-surface-hover: #192538;
+  --pitch-surface-elevated: #1e2c42;
+
+  /* Authentic Turf Grass */
+  --turf-grass: #22c55e;
+  --turf-grass-deep: #15803d;
+  --turf-grass-light: #4ade80;
+  --turf-grass-subtle: rgba(34, 197, 94, 0.08);
+  --turf-grass-border: rgba(34, 197, 94, 0.28);
+
+  /* Chalk Lines & Boundaries */
+  --chalk-white: #f8fafc;
+  --chalk-dim: #94a3b8;
+  --chalk-subtle: #475569;
+  --crease-border: rgba(255, 255, 255, 0.09);
+  --crease-border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Matchday Accents */
+  --floodlight-amber: #f59e0b;
+  --floodlight-subtle: rgba(245, 158, 11, 0.12);
+  --leather-ball: #ef4444;
+  --leather-subtle: rgba(239, 68, 68, 0.12);
+
+  /* Real-time Match Slot Statuses */
+  --slot-avail-text: #4ade80;
+  --slot-avail-bg: rgba(34, 197, 94, 0.07);
+  --slot-avail-border: rgba(34, 197, 94, 0.24);
+
+  --slot-held-text: #fbbf24;
+  --slot-held-bg: rgba(245, 158, 11, 0.09);
+  --slot-held-border: rgba(245, 158, 11, 0.35);
+
+  --slot-booked-text: #f87171;
+  --slot-booked-bg: rgba(239, 68, 68, 0.08);
+  --slot-booked-border: rgba(239, 68, 68, 0.26);
+
+  /* Authentic Athletic Typography */
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Global Reset */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+  background-color: var(--pitch-night);
+  color: var(--chalk-white);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--pitch-night);
+  /* Genuine grass field night texture with fine pitch lines */
+  background-image: 
+    radial-gradient(circle at 10% 0%, rgba(34, 197, 94, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 90% 0%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  background-attachment: fixed;
+  color: var(--chalk-white);
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Typography Directives */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--chalk-white);
+  line-height: 1.15;
+}
+
+.text-turf { color: var(--turf-grass-light); }
+.text-flame { color: #fb923c; }
+.text-gold { color: var(--floodlight-amber); }
+.text-muted { color: var(--chalk-dim); }
+.font-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Refined non-slop text styling */
+.text-gradient-turf {
+  color: var(--chalk-white);
+  position: relative;
+}
+.text-gradient-turf::after {
+  content: "";
+  display: block;
+  height: 3px;
+  background: var(--turf-grass);
+  width: 60%;
+  border-radius: 2px;
+  margin-top: 4px;
+}
+
+/* Clean SVG Icon Primitives */
+.icon {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  vertical-align: middle;
+  stroke-width: 2;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.icon-sm { width: 1rem; height: 1rem; }
+.icon-md { width: 1.35rem; height: 1.35rem; }
+.icon-lg { width: 1.85rem; height: 1.85rem; }
+.icon-xl { width: 2.4rem; height: 2.4rem; }
+
+/* Sticky Field Navigation Bar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(9, 13, 20, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--crease-border);
+}
+
+.nav-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4.75rem;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-logo-img {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--crease-border-strong);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-link:hover .brand-logo-img {
+  transform: translateY(-2px);
+}
+
+.brand-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  line-height: 1.1;
+}
+
+.brand-name .hindi-accent {
+  color: var(--turf-grass-light);
+  font-weight: 900;
+}
+
+.brand-sub {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--chalk-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  list-style: none;
+}
+
+.nav-item {
+  color: var(--chalk-dim);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+}
+
+.nav-item:hover, .nav-item.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-item.active {
+  color: var(--turf-grass-light);
+}
+
+/* Tactile Buttons with Real Physical Press States */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.45rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+  outline: none;
+  letter-spacing: -0.01em;
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn-primary {
+  background: var(--turf-grass-deep);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+.btn-flame {
+  background: #ea580c;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-flame:hover {
+  background: #f97316;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--chalk-white);
+  border: 1px solid var(--crease-border-strong);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+.btn-lg {
+  padding: 0.95rem 1.85rem;
+  font-size: 1.05rem;
+}
+
+/* Materiality & Cards: Anti-Card Overuse & Crisp 1px Borders */
+.card {
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border);
+  border-radius: 12px;
+  padding: 1.65rem;
+  position: relative;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  border-color: var(--crease-border-strong);
+}
+
+.card-stadium-glow {
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border-strong);
+  border-top: 3px solid var(--turf-grass);
+}
+
+/* Badges with Restrained Colors */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.badge-turf {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--turf-grass-light);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.badge-gold {
+  background: var(--floodlight-subtle);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-flame {
+  background: rgba(234, 88, 12, 0.12);
+  color: #fdba74;
+  border: 1px solid rgba(234, 88, 12, 0.25);
+}
+
+.badge-danger {
+  background: var(--leather-subtle);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.badge-dim {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--chalk-dim);
+  border: 1px solid var(--crease-border);
+}
+
+/* Hero Section: Split Asymmetric Left/Right Architecture (No Centered Hero) */
+.hero {
+  padding: 4.5rem 0 3.5rem;
+  position: relative;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.85fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid var(--turf-grass-border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--turf-grass-light);
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hero-title {
+  font-size: 3.4rem;
+  line-height: 1.05;
+  margin-bottom: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.hero-desc {
+  font-size: 1.05rem;
+  color: var(--chalk-dim);
+  max-width: 560px;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2.75rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--crease-border);
+}
+
+.hero-stat-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--font-mono);
+}
+
+.hero-stat-label {
+  font-size: 0.78rem;
+  color: var(--chalk-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+/* Authentic Turf Founder Badge Showcase (Right Column) */
+.hero-badge-card {
+  position: relative;
+  text-align: center;
+  padding: 2.25rem 2rem;
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border-strong);
+  border-radius: 16px;
+}
+
+/* Notice Box: Field Notice with Left Accent Bar */
+.notice-box {
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border);
+  border-left: 4px solid var(--turf-grass);
+  border-radius: 8px;
+  padding: 1.15rem 1.4rem;
+  margin: 1.25rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  color: var(--chalk-white);
+  font-size: 0.92rem;
+}
+
+.notice-box.notice-cleaning {
+  border-left-color: var(--turf-grass);
+}
+
+.notice-box.notice-policy {
+  border-left-color: var(--floodlight-amber);
+}
+
+/* Date Selector Pills */
+.date-selector-row {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding: 0.5rem 0 1rem;
+  scrollbar-width: thin;
+}
+
+.date-pill {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1.15rem;
+  border-radius: 8px;
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border);
+  color: var(--chalk-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 85px;
+}
+
+.date-pill:hover {
+  background: var(--pitch-surface);
+  border-color: var(--crease-border-strong);
+  color: #ffffff;
+}
+
+.date-pill.active {
+  background: var(--turf-grass-deep);
+  border-color: var(--turf-grass-light);
+  color: #ffffff;
+}
+
+.date-pill .day-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.date-pill .day-number {
+  font-size: 1.45rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  line-height: 1.1;
+}
+
+/* Sports Tabs */
+.sports-tabs {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.sport-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 1.25rem;
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border);
+  border-radius: 8px;
+  color: var(--chalk-dim);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.sport-tab:hover {
+  color: #ffffff;
+  border-color: var(--crease-border-strong);
+}
+
+.sport-tab.active {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: var(--turf-grass);
+  color: #ffffff;
+}
+
+/* Slot Control Bar */
+.slot-control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.35rem;
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.slot-legend {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.legend-dot.available { background: var(--turf-grass); }
+.legend-dot.held { background: var(--floodlight-amber); }
+.legend-dot.booked { background: var(--leather-ball); }
+
+/* Slots Grid: Clean Continuous Timetable Tiles */
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  gap: 0.75rem;
+}
+
+.period-filter-bar {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.period-btn {
+  background: transparent;
+  border: 1px solid var(--crease-border);
+  color: var(--chalk-dim);
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.period-btn:hover {
+  color: #ffffff;
+  border-color: var(--crease-border-strong);
+}
+
+.period-btn.active {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: var(--turf-grass);
+  color: #ffffff;
+}
+
+.slot-period-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.3rem;
+}
+
+.slot-period-tag.period-morning {
+  background: rgba(34, 197, 94, 0.12);
+  color: var(--turf-grass-light);
+}
+
+.slot-period-tag.period-noon {
+  background: var(--floodlight-subtle);
+  color: #fde68a;
+}
+
+.slot-period-tag.period-evening {
+  background: rgba(249, 115, 22, 0.12);
+  color: #fdba74;
+}
+
+.slot-period-tag.period-night {
+  background: rgba(56, 189, 248, 0.12);
+  color: #7dd3fc;
+}
+
+.slot-time-12h {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.slot-time-sub {
+  font-size: 0.72rem;
+  color: var(--chalk-subtle);
+  margin-bottom: 0.2rem;
+}
+
+.slot-floodlight-tag {
+  font-size: 0.65rem;
+  color: #fde68a;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+  letter-spacing: 0.02em;
+}
+
+.slot-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.65rem;
+  border-radius: 8px;
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  user-select: none;
+}
+
+.slot-card.status-available {
+  border-color: var(--slot-avail-border);
+  background: var(--slot-avail-bg);
+}
+
+.slot-card.status-available:hover {
+  border-color: var(--turf-grass);
+  background: rgba(34, 197, 94, 0.14);
+  transform: translateY(-2px);
+}
+
+.slot-card.status-held {
+  border-color: var(--slot-held-border);
+  background: var(--slot-held-bg);
+  cursor: not-allowed;
+}
+
+.slot-card.status-booked {
+  border-color: var(--slot-booked-border);
+  background: var(--slot-booked-bg);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.slot-card.selected {
+  border-color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.16) !important;
+  transform: translateY(-2px);
+}
+
+.slot-time {
+  font-family: var(--font-mono);
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.slot-price {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--turf-grass-light);
+  margin-top: 0.25rem;
+}
+
+.slot-status-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+}
+
+/* Floating Sticky Booking Summary Bar */
+.booking-summary-bar {
+  position: sticky;
+  bottom: 1.5rem;
+  z-index: 40;
+  background: var(--pitch-ground);
+  border: 1px solid var(--turf-grass);
+  border-radius: 12px;
+  padding: 1.15rem 1.75rem;
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+/* Forms & Inputs */
+.form-group {
+  margin-bottom: 1.35rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--chalk-dim);
+  margin-bottom: 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.8rem 1.1rem;
+  background: #090d14;
+  border: 1px solid var(--crease-border-strong);
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--turf-grass);
+}
+
+/* Payment Mode Radio Cards */
+.payment-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.payment-card-option {
+  border: 1px solid var(--crease-border-strong);
+  border-radius: 10px;
+  padding: 1.35rem;
+  background: var(--pitch-ground);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.payment-card-option:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.payment-card-option.active {
+  border-color: var(--turf-grass);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+/* UPI QR Section */
+.upi-qr-box {
+  background: #ffffff;
+  padding: 1.15rem;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.upi-id-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--crease-border-strong);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--turf-grass-light);
+}
+
+/* Upload Dropzone */
+.dropzone {
+  border: 2px dashed var(--crease-border-strong);
+  border-radius: 10px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.dropzone:hover {
+  border-color: var(--turf-grass);
+  background: rgba(34, 197, 94, 0.04);
+}
+
+/* Data Table: Crisp Line Separators (Anti-Card Density) */
+.data-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--crease-border);
+  border-radius: 10px;
+  background: var(--pitch-ground);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.data-table th {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.9rem 1.15rem;
+  color: var(--chalk-dim);
+  font-weight: 700;
+  border-bottom: 1px solid var(--crease-border-strong);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.data-table td {
+  padding: 1.1rem;
+  border-bottom: 1px solid var(--crease-border);
+  color: var(--chalk-white);
+}
+
+.data-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(5, 8, 14, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: var(--pitch-ground);
+  border: 1px solid var(--crease-border-strong);
+  border-radius: 14px;
+  max-width: 580px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2.25rem;
+  position: relative;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8);
+}
+
+/* Footer: Clean Editorial Stadium Desk */
+.footer {
+  margin-top: 5rem;
+  background: #06090e;
+  border-top: 1px solid var(--crease-border);
+  padding: 4rem 0 2.5rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 3rem;
+  margin-bottom: 3.5rem;
+}
+
+.footer-bottom {
+  padding-top: 2rem;
+  border-top: 1px solid var(--crease-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--chalk-subtle);
+  font-size: 0.82rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+}
+
+@media (max-width: 768px) {
+  .nav-links > li:has(.nav-item) { display: none; }
+  .brand-sub { display: none; }
+  .hero-title { font-size: 2.45rem; }
+  .payment-selector-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .booking-summary-bar { flex-direction: column; align-items: stretch; }
+  .founder-banner-grid {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+    gap: 1.5rem !important;
+  }
+  .founder-banner-grid > div { margin: 0 auto; }
+}

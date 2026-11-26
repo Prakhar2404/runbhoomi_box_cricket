@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0 4rem;">
+  <!-- Top Admin Section Switcher Tabs -->
+  <div style="display: flex; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-boundary); padding-bottom: 1.25rem; flex-wrap: wrap; align-items: center;">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline btn-md" style="font-weight: 800;">
+      <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
+      ← Return to Matches & Operations
+    </a>
+    <a href="{{ url_for('revenue_analytics') }}" class="btn btn-primary btn-md" style="box-shadow: 0 0 20px var(--turf-green-glow); font-weight: 900;">
+      <svg class="icon icon-sm text-gold"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-trophy"></use></svg>
+      💰 Financial & Revenue Intelligence (Active)
+    </a>
+    <a href="{{ url_for('canteen_page') }}" target="_blank" class="btn btn-outline btn-md" style="margin-left: auto;">
+      <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
+      Public Canteen Menu ↗
+    </a>
+  </div>
+
+  <!-- Header & Filter Bar -->
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+    <div>
+      <div class="hero-tag" style="margin-bottom: 0.5rem;">
+        <svg class="icon icon-sm text-gold"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-trophy"></use></svg>
+        OWNER FINANCIAL COMMAND CENTER • ADITYA GOYAL
+      </div>
+      <h1 style="font-size: 2.35rem; margin: 0 0 0.35rem;">Revenue & Concession Analytics</h1>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
+        Real-time financial breakdown of total cleared earnings, outstanding match balances, and today's cash/UPI collections.
+      </p>
+    </div>
+
+    <!-- Time Filter Pills -->
+    <div style="display: flex; gap: 0.5rem; background: var(--bg-card); padding: 0.4rem; border-radius: 0.75rem; border: 1px solid var(--border-boundary); flex-wrap: wrap;">
+      <a href="?filter=today" class="btn btn-outline btn-sm {% if time_filter == 'today' %}btn-primary{% endif %}">Today</a>
+      <a href="?filter=7d" class="btn btn-outline btn-sm {% if time_filter == '7d' %}btn-primary{% endif %}">7 Days</a>
+      <a href="?filter=30d" class="btn btn-outline btn-sm {% if time_filter == '30d' %}btn-primary{% endif %}">30 Days</a>
+      <a href="?filter=6m" class="btn btn-outline btn-sm {% if time_filter == '6m' %}btn-primary{% endif %}">6 Months</a>
+      <a href="?filter=1y" class="btn btn-outline btn-sm {% if time_filter == '1y' %}btn-primary{% endif %}">1 Year</a>
+    </div>
+  </div>
+
+  <!-- THE 3 PRIMARY FINANCIAL KPI CARDS (MANDATORY REQUIREMENT) -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+    <!-- 1. TOTAL AMOUNT EARNED -->
+    <div class="card card-stadium-glow" style="border: 2px solid var(--turf-green); background: linear-gradient(135deg, rgba(6, 78, 59, 0.4) 0%, rgba(13, 21, 34, 0.98) 100%);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span class="badge badge-turf" style="font-weight: 800; font-size: 0.78rem;">1. TOTAL AMOUNT EARNED</span>
+        <svg class="icon icon-lg text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+      </div>
+      <div class="font-mono" style="font-size: 2.75rem; font-weight: 900; color: #ffffff; line-height: 1.1; margin-bottom: 0.35rem;">
+        ₹{{ total_amount_earned|int }}
+      </div>
+      <div style="font-size: 0.88rem; color: var(--turf-green-light); font-weight: 700; margin-bottom: 0.5rem;">
+        Total Cleared Revenue (Matches + In-House Canteen)
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem;">
+        Match Bookings: <strong>₹{{ total_booking_earned|int }}</strong> • Canteen Concessions: <strong>₹{{ total_canteen_orders|int }}</strong>
+      </div>
+    </div>
+
+    <!-- 2. TOTAL PENDING AMOUNT -->
+    <div class="card card-stadium-glow" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(13, 21, 34, 0.98) 100%);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; font-weight: 800; font-size: 0.78rem;">2. TOTAL PENDING AMOUNT</span>
+        <svg class="icon icon-lg" style="color: #f87171;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-rupee"></use></svg>
+      </div>
+      <div class="font-mono" style="font-size: 2.75rem; font-weight: 900; color: #f87171; line-height: 1.1; margin-bottom: 0.35rem;">
+        ₹{{ total_pending_amount|int }}
+      </div>
+      <div style="font-size: 0.88rem; color: #fca5a5; font-weight: 700; margin-bottom: 0.5rem;">
+        Outstanding Balance Across All Confirmed Matches
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem;">
+        {{ total_pending_count }} confirmed bookings with remaining match balance due at turf.
+      </div>
+    </div>
+
+    <!-- 3. TOTAL AMOUNT TO COLLECT AT THAT DAY (TODAY) -->
+    <div class="card card-stadium-glow" style="border: 2px solid var(--gold-accent); background: linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(13, 21, 34, 0.98) 100%);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <span class="badge badge-gold" style="font-weight: 800; font-size: 0.78rem;">3. TODAY'S TURF COLLECTION DUE</span>
+        <svg class="icon icon-lg text-gold"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
+      </div>
+      <div class="font-mono" style="font-size: 2.75rem; font-weight: 900; color: var(--gold-accent); line-height: 1.1; margin-bottom: 0.35rem;">
+        ₹{{ today_amount_to_collect|int }}
+      </div>
+      <div style="font-size: 0.88rem; color: #fde047; font-weight: 700; margin-bottom: 0.5rem;">
+        Amount to Collect at Turf Today ({{ today_date_formatted }})
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem;">
+        Today's Matches: <strong>{{ today_matches_count }}</strong> • Already Cleared Today: <strong>₹{{ today_earned|int }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S MATCHDAY COLLECTION DESK (IF MATCHES EXIST TODAY) -->
+  {% if today_bookings %}
+  <div class="card" style="margin-bottom: 2.5rem; border: 1.5px solid var(--gold-accent);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h3 style="font-size: 1.3rem; color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+          <svg class="icon icon-md text-gold"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
+          Today's Matchday Turf Collection Schedule ({{ today_date_formatted }})
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+          All teams playing at Runbhoomi today. Collect outstanding balances before kickoff.
+        </p>
+      </div>
+      <span class="badge badge-gold font-mono" style="font-size: 0.85rem;">
+        ₹{{ today_amount_to_collect|int }} To Collect Today
+      </span>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Booking Ref</th>
+            <th>Captain / Team</th>
+            <th>Phone</th>
+            <th>Sport</th>
+            <th>Time Slot</th>
+            <th>Total Bill</th>
+            <th>Advance Paid</th>
+            <th>Amount to Collect</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in today_bookings %}
+          <tr>
+            <td class="font-mono" style="font-weight: 800; color: var(--turf-green-light);">
+              {{ b.booking_ref }}
+            </td>
+            <td style="font-weight: 700; color: #ffffff;">{{ b.customer_name }}</td>
+            <td class="font-mono">
+              <a href="tel:{{ b.customer_phone }}" style="color: inherit; text-decoration: none;">+91 {{ b.customer_phone }}</a>
+            </td>
+            <td>{{ b.sport_name }}</td>
+            <td style="color: var(--flame-orange); font-weight: 700;">
+              {{ format_slot_range_12hr(b.start_time, b.end_time) }}
+            </td>
+            <td class="font-mono">₹{{ b.total_amount|int }}</td>
+            <td class="font-mono" style="color: var(--turf-green-light);">₹{{ b.advance_paid|int }}</td>
+            <td class="font-mono" style="font-weight: 900; font-size: 1.1rem; color: {% if b.balance_due > 0 %}#f87171{% else %}var(--turf-green-light){% endif %};">
+              {% if b.balance_due > 0 %}₹{{ b.balance_due|int }}{% else %}CLEARED ✓{% endif %}
+            </td>
+            <td>
+              {% if b.balance_due > 0 %}
+              <button class="btn btn-primary btn-sm" onclick="collectTurfBalance({{ b.id }}, '{{ b.booking_ref }}')">
+                Collect ₹{{ b.balance_due|int }}
+              </button>
+              {% else %}
+              <span class="badge badge-turf">Settled</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- METRICS INTELLIGENCE CARDS (PHASE 6 MANDATORY) -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+    <!-- 1. Total Matches Played -->
+    <div class="card card-stadium-glow">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Matches Played</span>
+        <svg class="icon icon-md text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-cricket"></use></svg>
+      </div>
+      <div class="font-mono" style="font-size: 2.25rem; font-weight: 900; color: #ffffff;">
+        {{ total_matches }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--turf-green-light); margin-top: 0.25rem;">Confirmed Bookings</div>
+    </div>
+
+    <!-- 2. Gross Booking Sales -->
+    <div class="card card-stadium-glow">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Gross Match Sales</span>
+        <svg class="icon icon-md" style="color: #38bdf8;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-rupee"></use></svg>
+      </div>
+      <div class="font-mono" style="font-size: 2.25rem; font-weight: 900; color: #38bdf8;">
+        ₹{{ gross_booking_sales|int }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.25rem;">Total Value Billed</div>
+    </div>
+
+    <!-- 3. Amount Collected (Advance Tokens) -->
+    <div class="card card-stadium-glow">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Booking Cash Collected</span>
+        <svg class="icon icon-md text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-check"></use></svg>
+      </div>
+      <div class="font-mono" style="font-size: 2.25rem; font-weight: 900; color: var(--turf-green-light);">
+        ₹{{ amount_collected|int }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.25rem;">Cleared via UPI & Turf</div>
+    </div>
+
+    <!-- 4. Canteen Concession Revenue -->
+    <div class="card card-stadium-glow">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Canteen Concessions</span>
+        <svg class="icon icon-md text-flame"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
+      </div>
+      <div class="font-mono" style="font-size: 2.25rem; font-weight: 900; color: var(--flame-orange);">
+        ₹{{ canteen_revenue|int }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.25rem;">Drinks, Snacks & Rental</div>
+    </div>
+
+    <!-- 5. Total Collected Revenue -->
+    <div class="card card-stadium-glow" style="border: 1px solid var(--turf-green); background: linear-gradient(135deg, rgba(6,78,59,0.3) 0%, rgba(13,21,34,0.95) 100%);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-size: 0.75rem; color: var(--turf-green-light); text-transform: uppercase; font-weight: 800;">Total Revenue Collected</span>
+        <svg class="icon icon-md text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+      </div>
+      <div class="font-mono" style="font-size: 2.25rem; font-weight: 900; color: #ffffff;">
+        ₹{{ total_collected_revenue|int }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--turf-green-light); margin-top: 0.25rem;">Matches + In-House Canteen</div>
+    </div>
+  </div>
+
+  <!-- PENDING BALANCE TRACKER (PHASE 6 MANDATORY) -->
+  <div class="card" style="margin-bottom: 3rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h3 style="font-size: 1.35rem; color: #ffffff;">Pending Balance Tracker (Token Bookings)</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          All advance token bookings with remaining 50% match balance due at ground kickoff.
+        </p>
+      </div>
+      <span class="badge badge-warning font-mono" style="font-size: 0.85rem;">
+        {{ pending_balances|length }} Pending Collections
+      </span>
+    </div>
+
+    {% if pending_balances %}
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Booking Ref</th>
+            <th>Customer / Captain</th>
+            <th>Contact Number</th>
+            <th>Sport Arena</th>
+            <th>Match Date & Slot</th>
+            <th>Total Bill</th>
+            <th>Token Paid</th>
+            <th>Exact Balance Due</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in pending_balances %}
+          <tr>
+            <td class="font-mono" style="font-weight: 800; color: var(--turf-green-light);">
+              <a href="{{ url_for('match_voucher', booking_ref=b.booking_ref) }}" target="_blank" style="color: inherit; text-decoration: underline;">
+                {{ b.booking_ref }}
+              </a>
+            </td>
+            <td style="font-weight: 700; color: #ffffff;">{{ b.customer_name }}</td>
+            <td class="font-mono">
+              <a href="tel:{{ b.customer_phone }}" style="color: inherit; text-decoration: none;">+91 {{ b.customer_phone }}</a>
+            </td>
+            <td>{{ b.sport_name }}</td>
+            <td>
+              <div style="color: #ffffff; font-weight: 700;">{{ b.booking_date }}</div>
+              <div style="font-size: 0.8rem; color: var(--flame-orange); font-weight: 700;">{{ format_slot_range_12hr(b.start_time, b.end_time) }}</div>
+            </td>
+            <td class="font-mono">₹{{ b.total_amount|int }}</td>
+            <td class="font-mono" style="color: var(--turf-green-light);">₹{{ b.advance_paid|int }}</td>
+            <td class="font-mono" style="color: #f87171; font-weight: 900; font-size: 1.05rem;">
+              ₹{{ b.balance_due|int }}
+            </td>
+            <td>
+              <button class="btn btn-primary btn-sm" onclick="collectTurfBalance({{ b.id }}, '{{ b.booking_ref }}')">
+                Collect & Settle
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+      <svg class="icon icon-lg text-turf" style="margin-bottom: 0.5rem;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-check"></use></svg>
+      <div>Zero outstanding balances! All confirmed bookings are fully settled.</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sports Breakdown Table -->
+  <div class="card">
+    <h3 style="font-size: 1.35rem; margin-bottom: 1rem;">Multi-Sport Revenue Distribution</h3>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Sport Facility</th>
+            <th>Confirmed Matches</th>
+            <th>Gross Generated Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sb in sports_breakdown %}
+          <tr>
+            <td style="font-weight: 700; color: #ffffff;">{{ sb.name }}</td>
+            <td class="font-mono">{{ sb.match_count }}</td>
+            <td class="font-mono" style="color: var(--turf-green-light); font-weight: 800;">₹{{ sb.total_rev|int }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function collectTurfBalance(id, ref) {
+  if (!confirm(`Mark balance collected at turf for ${ref}?`)) return;
+
+  fetch(`/admin/booking/collect-balance/${id}`, { method: "POST" })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert(res.message);
+      location.reload();
+    }
+  });
+}
+</script>
+{% endblock %}

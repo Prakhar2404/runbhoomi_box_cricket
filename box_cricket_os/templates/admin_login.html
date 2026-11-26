@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="padding: 4rem 0; min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+  <div class="card card-stadium-glow" style="max-width: 440px; width: 100%; padding: 2.5rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <img src="{{ url_for('static', filename='img/brand_logo_circle.png') }}" alt="Logo" style="width: 85px; height: 85px; border-radius: 50%; border: 2px solid var(--gold-accent); box-shadow: 0 0 20px var(--turf-green-glow); margin-bottom: 1rem;">
+      <h2 style="font-size: 1.65rem; color: #ffffff;">Staff Command Portal</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem;">
+        {{ BRAND_NAME }} • Admin & Partner Access
+      </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_login') }}">
+      <div class="form-group">
+        <label class="form-label">Admin Mobile / Email</label>
+        <input type="text" name="phone_or_email" class="form-control" placeholder="8858908825 or email" required autofocus>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.75rem;">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+        <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+        Sign In to Command Center
+      </button>
+
+      <div style="margin-top: 1.5rem; text-align: center; font-size: 0.78rem; color: var(--text-dim); line-height: 1.5;">
+        Registered Primary Admin: <strong>{{ BUSINESS_OWNER }}</strong><br>
+        Corporate Entity: {{ LEGAL_ENTITY }}
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,833 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="padding: 2.5rem 0 4rem;">
+  <!-- Dashboard Top Bar -->
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-boundary); padding-bottom: 1.5rem;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <img src="{{ url_for('static', filename='img/owner_aditya_goyal.jpg') }}" alt="Aditya Goyal" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; object-position: center top; border: 2.5px solid var(--turf-green-light); box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <span class="badge {% if admin_user.role == 'admin' %}badge-flame{% else %}badge-turf{% endif %}">
+            {{ admin_user.role.upper() }} ACCESS
+          </span>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Signed in as <strong>{{ admin_user.name }}</strong> ({{ admin_user.phone }})</span>
+        </div>
+        <h1 style="font-size: 2.25rem; margin-top: 0.35rem;">Admin & Partner Command Center</h1>
+        {% if admin_user.role == 'partner' %}
+        <div style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--border-turf); padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.8rem; color: var(--turf-green-light);">
+          <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+          Partner Operational Access: Match Verifications, Turf Balance Collections & Canteen POS. (Revenue & Tariffs Restricted to Owner)
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+      {% if admin_user.role == 'admin' %}
+      <a href="{{ url_for('revenue_analytics') }}" class="btn btn-primary btn-sm">
+        <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-trophy"></use></svg>
+        Revenue Intelligence
+      </a>
+      {% else %}
+      <span class="badge badge-dim" style="padding: 0.45rem 0.75rem; border: 1px solid var(--border-crease); font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem;" title="Revenue Intelligence is restricted to Turf Owner">
+        Revenue: Owner Only
+      </span>
+      {% endif %}
+      <a href="{{ url_for('index') }}" target="_blank" class="btn btn-outline btn-sm">
+        <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
+        Customer View
+      </a>
+      <a href="{{ url_for('admin_logout') }}" class="btn btn-outline btn-sm">Sign Out</a>
+    </div>
+  </div>
+
+  <!-- Top Admin Section Switcher Tabs (Matches vs Revenue Page) -->
+  <div style="display: flex; gap: 0.75rem; margin-bottom: 1.75rem; border-bottom: 2px solid var(--border-boundary); padding-bottom: 1.25rem; flex-wrap: wrap; align-items: center;">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-md" style="font-weight: 800; box-shadow: 0 0 15px var(--turf-green-glow);">
+      <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
+      📋 Matches & Ground Operations (Active)
+    </a>
+    {% if admin_user.role == 'admin' %}
+    <a href="{{ url_for('revenue_analytics') }}" class="btn btn-outline btn-md" style="border-color: var(--gold-accent); color: var(--gold-accent); font-weight: 900;">
+      <svg class="icon icon-sm text-gold"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-trophy"></use></svg>
+      💰 Financial & Revenue Intelligence (New Page) →
+    </a>
+    {% endif %}
+    <a href="{{ url_for('canteen_page') }}" target="_blank" class="btn btn-outline btn-md" style="margin-left: auto;">
+      <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
+      Public Canteen Menu ↗
+    </a>
+  </div>
+
+  <!-- Command Center Tabs Navigation -->
+  <div style="display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1.75rem; border-bottom: 1px solid var(--border-boundary); padding-bottom: 0.5rem;">
+    <button class="btn btn-outline btn-sm active-tab" onclick="switchTab('inProcessTab', this)">
+      <svg class="icon icon-sm text-flame"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-clock"></use></svg>
+      In-Process Bookings ({{ in_process_bookings|length }})
+    </button>
+    <button class="btn btn-outline btn-sm" onclick="switchTab('confirmedTab', this)">
+      <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-check"></use></svg>
+      Confirmed Matches ({{ confirmed_bookings|length }})
+    </button>
+    <button class="btn btn-outline btn-sm" onclick="switchTab('cancelledTab', this)">
+      <svg class="icon icon-sm" style="color: #f87171;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-cross"></use></svg>
+      Cancelled ({{ cancelled_bookings|length }})
+    </button>
+    {% if admin_user.role == 'admin' %}
+    <button class="btn btn-outline btn-sm" onclick="switchTab('partnersTab', this)">
+      <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-user"></use></svg>
+      Partner Management ({{ partners|length }}/2)
+    </button>
+    {% endif %}
+    <button class="btn btn-outline btn-sm" onclick="switchTab('canteenTab', this)">
+      <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
+      Canteen POS
+    </button>
+    <button class="btn btn-outline btn-sm" onclick="switchTab('customersTab', this)">
+      <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-user"></use></svg>
+      Customer Accounts ({{ registered_customers|length }})
+    </button>
+  </div>
+
+  <!-- TAB 1: IN PROCESS BOOKINGS WINDOW -->
+  <div id="inProcessTab" class="tab-pane">
+    <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-size: 1.35rem;">Incoming Matches Awaiting Proof Verification</h3>
+      <span style="font-size: 0.85rem; color: var(--text-dim);">Slots locked in system under 🔴 RED</span>
+    </div>
+
+    {% if in_process_bookings %}
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Ref ID</th>
+            <th>Customer / Captain</th>
+            <th>Sport & Slot</th>
+            <th>Total Bill</th>
+            <th>Advance Token</th>
+            <th>Balance Due</th>
+            <th>Payment Proof</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in in_process_bookings %}
+          <tr>
+            <td class="font-mono" style="font-weight: 800; color: var(--turf-green-light);">{{ b.booking_ref }}</td>
+            <td>
+              <div style="font-weight: 700; color: #ffffff;">{{ b.customer_name }}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">+91 {{ b.customer_phone }} (Age: {{ b.age }})</div>
+            </td>
+            <td>
+              <div style="font-weight: 700; color: #ffffff;">{{ b.sport_name }}</div>
+              <div style="font-size: 0.8rem; color: var(--flame-orange); font-weight: 700;">{{ b.booking_date }} | {{ format_slot_range_12hr(b.start_time, b.end_time) }}</div>
+            </td>
+            <td class="font-mono">₹{{ b.total_amount|int }}</td>
+            <td class="font-mono" style="color: var(--turf-green-light); font-weight: 700;">₹{{ b.advance_paid|int }}</td>
+            <td class="font-mono" style="color: #f87171; font-weight: 700;">₹{{ b.balance_due|int }}</td>
+            <td>
+              {% if b.screenshot_url %}
+              <button class="btn btn-outline btn-sm" onclick="viewScreenshot('{{ url_for('uploaded_file', filename=b.screenshot_url) }}', '{{ b.booking_ref }}')">
+                <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-download"></use></svg>
+                View Proof
+              </button>
+              {% else %}
+              <span style="color: var(--text-dim); font-size: 0.8rem;">No file</span>
+              {% endif %}
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.4rem;">
+                <button class="btn btn-primary btn-sm" onclick="confirmBooking({{ b.id }}, '{{ b.booking_ref }}')">
+                  Confirm
+                </button>
+                <button class="btn btn-outline btn-sm" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4);" onclick="cancelBooking({{ b.id }}, '{{ b.booking_ref }}')">
+                  Cancel
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+      <svg class="icon icon-xl text-turf" style="margin-bottom: 0.75rem;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-check"></use></svg>
+      <h4>All Clear! No Incoming In-Process Bookings</h4>
+      <p style="font-size: 0.85rem;">New match registrations with uploaded payment proofs will appear here immediately.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- TAB 2: CONFIRMED BOOKED WINDOW -->
+  <div id="confirmedTab" class="tab-pane" style="display: none;">
+    <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-size: 1.35rem;">Active Confirmed Matches & Balance Tracker</h3>
+      <span style="font-size: 0.85rem; color: var(--text-dim);">Mark balance collected or add canteen orders to running bill</span>
+    </div>
+
+    {% if confirmed_bookings %}
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Ref ID</th>
+            <th>Player Info</th>
+            <th>Match Slot</th>
+            <th>Total Bill</th>
+            <th>Advance Paid</th>
+            <th>Balance Due</th>
+            <th>Confirmed By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in confirmed_bookings %}
+          <tr>
+            <td class="font-mono" style="font-weight: 800; color: var(--turf-green-light);">
+              <a href="{{ url_for('match_voucher', booking_ref=b.booking_ref) }}" target="_blank" style="color: inherit; text-decoration: underline;">
+                {{ b.booking_ref }}
+              </a>
+            </td>
+            <td>
+              <div style="font-weight: 700; color: #ffffff;">{{ b.customer_name }}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">+91 {{ b.customer_phone }}</div>
+            </td>
+            <td>
+              <div style="font-weight: 700;">{{ b.sport_name }}</div>
+              <div style="font-size: 0.8rem; color: var(--flame-orange); font-weight: 700;">{{ b.booking_date }} | {{ format_slot_range_12hr(b.start_time, b.end_time) }}</div>
+            </td>
+            <td class="font-mono">₹{{ b.total_amount|int }}</td>
+            <td class="font-mono" style="color: var(--turf-green-light);">₹{{ b.advance_paid|int }}</td>
+            <td>
+              {% if b.balance_due > 0 %}
+              <div class="font-mono" style="color: #f87171; font-weight: 800;">₹{{ b.balance_due|int }} DUE</div>
+              <button class="btn btn-outline btn-sm" style="font-size: 0.72rem; padding: 0.2rem 0.5rem; margin-top: 0.2rem;" onclick="collectBalance({{ b.id }}, '{{ b.booking_ref }}')">
+                Collect at Turf
+              </button>
+              {% else %}
+              <span class="badge badge-turf">SETTLED</span>
+              {% endif %}
+            </td>
+            <td style="font-size: 0.8rem; color: var(--text-dim);">
+              {{ b.confirmed_by or 'Admin' }}<br>
+              <span style="font-size: 0.72rem;">{{ b.confirmed_at or '' }}</span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <button class="btn btn-outline btn-sm" onclick="openAddCanteenModal({{ b.id }}, '{{ b.booking_ref }}', '{{ b.customer_name }}')">
+                  + Canteen
+                </button>
+                <a href="{{ url_for('match_voucher', booking_ref=b.booking_ref) }}" target="_blank" class="btn btn-outline btn-sm">
+                  Pass
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+      <h4>No Confirmed Matches Yet</h4>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- TAB 3: CANCELLED BOOKINGS WINDOW -->
+  <div id="cancelledTab" class="tab-pane" style="display: none;">
+    <div style="margin-bottom: 1rem;">
+      <h3 style="font-size: 1.35rem;">Cancelled Bookings Log</h3>
+      <p style="font-size: 0.85rem; color: var(--text-dim);">
+        Enforces policy: 50% retained fee & 25% future credit promo code issued to player.
+      </p>
+    </div>
+
+    {% if cancelled_bookings %}
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Ref ID</th>
+            <th>Customer</th>
+            <th>Match Date & Sport</th>
+            <th>Original Amount</th>
+            <th>Retained 50% Fee</th>
+            <th>25% Credit Promo Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in cancelled_bookings %}
+          <tr>
+            <td class="font-mono">{{ b.booking_ref }}</td>
+            <td>
+              <div style="font-weight: 700;">{{ b.customer_name }}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">+91 {{ b.customer_phone }}</div>
+            </td>
+            <td>{{ b.booking_date }} | {{ b.sport_name }}</td>
+            <td class="font-mono">₹{{ b.total_amount|int }}</td>
+            <td class="font-mono" style="color: var(--flame-orange); font-weight: 800;">₹{{ b.cancellation_fee|int }}</td>
+            <td>
+              <span class="badge badge-flame font-mono">{{ b.future_credit_code }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+      <h4>No Cancelled Bookings</h4>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- TAB 4: PARTNER MANAGEMENT (MAX 2 PARTNERS) -->
+  {% if admin_user.role == 'admin' %}
+  <div id="partnersTab" class="tab-pane" style="display: none;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+      <div class="card">
+        <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem;">Registered Partners (Max 2)</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Partners can confirm match bookings, alter sports, and add canteen items to running customer tabs.
+        </p>
+
+        {% if partners %}
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {% for p in partners %}
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-boundary); padding: 1rem; border-radius: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 800; font-size: 1.1rem; color: #ffffff;">{{ p.name }}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Phone: {{ p.phone }} | {{ p.email or 'No email' }}</div>
+              <span class="badge badge-turf" style="margin-top: 0.35rem;">Restricted Partner</span>
+            </div>
+            <form action="{{ url_for('delete_partner', partner_id=p.id) }}" method="POST" onsubmit="return confirm('Remove partner access?')">
+              <button type="submit" class="btn btn-outline btn-sm" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4);">
+                Remove
+              </button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="color: var(--text-dim); font-size: 0.9rem; padding: 1rem 0;">No secondary partners registered yet.</div>
+        {% endif %}
+      </div>
+
+      <!-- Add Partner Form -->
+      <div class="card">
+        <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem;">Add New Partner</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Limit: Up to 2 partners. Custom password-protected login.
+        </p>
+
+        {% if partners|length < 2 %}
+        <form action="{{ url_for('add_partner') }}" method="POST">
+          <div class="form-group">
+            <label class="form-label">Partner Name</label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Sameer Verma" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Partner Contact Number</label>
+            <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email (Optional)</label>
+            <input type="email" name="email" class="form-control" placeholder="partner@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Set Access Password</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            Create Partner Account
+          </button>
+        </form>
+        {% else %}
+        <div class="notice-box notice-policy">
+          Partner limit reached (2/2). Remove an existing partner to add a new one.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- TAB 5: CANTEEN POS CATALOG -->
+  <div id="canteenTab" class="tab-pane" style="display: none;">
+    <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h3 style="font-size: 1.35rem;">In-House Canteen POS & Concession Inventory</h3>
+        <p style="font-size: 0.85rem; color: var(--text-dim);">Fresh kitchen food, egg dishes, Maggie, mocktails, chai, smokes, and gear rental.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('canteen_page') }}" target="_blank" class="btn btn-outline btn-sm">
+          <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
+          Customer Canteen View ↗
+        </a>
+      </div>
+    </div>
+
+    <!-- MANDATORY CANTEEN HYGIENE NOTICE -->
+    <div class="card" style="margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.08); border: 1px solid var(--border-turf); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.85rem;">
+      <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+      </div>
+      <div>
+        <strong style="color: var(--turf-green-light); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em;">Official Canteen Protocol</strong>
+        <p style="margin: 0; font-size: 0.88rem; color: #ffffff; font-weight: 600;">{{ CANTEEN_HYGIENE_NOTICE }}</p>
+      </div>
+    </div>
+
+    <!-- ADMIN CANTEEN SEARCH BAR -->
+    <div style="margin-bottom: 1.25rem;">
+      <input type="text" id="adminCanteenSearch" onkeyup="filterAdminCanteen()" placeholder="Filter canteen products..." class="form-control" style="max-width: 400px; font-size: 0.88rem;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;" id="adminCanteenGrid">
+      {% for item in canteen_items %}
+      <div class="card admin-canteen-card" data-name="{{ item.name|lower }}" data-cat="{{ item.category|lower }}" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="badge badge-turf" style="font-size: 0.72rem;">{{ item.category.replace('_', ' ').upper() }}</span>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">Stock: {{ item.stock }}</span>
+          </div>
+          <h4 style="font-size: 1.05rem; color: #ffffff; margin-bottom: 0.35rem;">{{ item.name }}</h4>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-boundary); padding-top: 0.75rem; margin-top: 1rem;">
+          <div class="font-mono" style="font-size: 1.35rem; font-weight: 900; color: var(--turf-green-light);">
+            ₹{{ item.price|int }}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-dim);">ID #{{ item.id }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <script>
+  function filterAdminCanteen() {
+    const q = (document.getElementById('adminCanteenSearch').value || '').toLowerCase().trim();
+    document.querySelectorAll('.admin-canteen-card').forEach(c => {
+      const name = c.dataset.name || '';
+      const cat = c.dataset.cat || '';
+      if (!q || name.includes(q) || cat.includes(q)) {
+        c.style.display = 'flex';
+      } else {
+        c.style.display = 'none';
+      }
+    });
+  }
+  </script>
+
+  <!-- TAB 6: REGISTERED CUSTOMER ACCOUNTS -->
+  <div id="customersTab" class="tab-pane" style="display: none;">
+    <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h3 style="font-size: 1.35rem; color: #ffffff;">Registered Customer Accounts & Player Profiles</h3>
+        <span style="font-size: 0.85rem; color: var(--text-dim);">Directory of players registered with minimum 6-character secure passwords</span>
+      </div>
+      <div class="badge badge-turf" style="font-size: 0.85rem; padding: 0.4rem 0.85rem;">
+        Total Players: {{ registered_customers|length }}
+      </div>
+    </div>
+
+    {% if registered_customers %}
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Player ID</th>
+            <th>Player Name</th>
+            <th>Contact Number</th>
+            <th>Demographics</th>
+            <th>Matches Booked</th>
+            <th>Total Spent</th>
+            <th>Member Since</th>
+            <th>Direct Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in registered_customers %}
+          <tr>
+            <td class="font-mono" style="color: var(--turf-green-light); font-weight: 700;">#PL-{{ c.id }}</td>
+            <td>
+              <div style="font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 0.45rem;">
+                <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-user"></use></svg>
+                {{ c.name }}
+              </div>
+              {% if c.email %}
+              <div style="font-size: 0.75rem; color: var(--text-dim);">{{ c.email }}</div>
+              {% endif %}
+            </td>
+            <td>
+              <a href="tel:{{ c.phone }}" style="color: var(--turf-green-light); font-weight: 700; text-decoration: none;">
+                +91 {{ c.phone }}
+              </a>
+            </td>
+            <td>
+              <span style="font-size: 0.85rem; color: var(--text-muted);">{{ c.gender }}, {{ c.age }} yrs</span>
+            </td>
+            <td>
+              {% if c.booking_count > 0 %}
+              <span class="badge badge-turf">{{ c.booking_count }} Match{% if c.booking_count > 1 %}es{% endif %}</span>
+              {% else %}
+              <span class="badge badge-outline">0 Matches</span>
+              {% endif %}
+            </td>
+            <td class="font-mono" style="font-weight: 800; color: #ffffff;">
+              ₹{{ c.total_spent|int }}
+            </td>
+            <td style="font-size: 0.8rem; color: var(--text-dim);">
+              {{ c.created_at[:10] if c.created_at else 'Active' }}
+            </td>
+            <td>
+              <a href="https://wa.me/91{{ c.phone }}" target="_blank" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; color: var(--turf-green-bright); border-color: rgba(16, 185, 129, 0.4);">
+                <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
+                WhatsApp
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+      No customer accounts registered yet.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal: Inspect Payment Screenshot Proof -->
+<div class="modal-overlay" id="proofModal" onclick="closeProofModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h3 style="font-size: 1.25rem;" id="proofModalTitle">Transaction Screenshot Proof</h3>
+      <button onclick="closeProofModal()" class="btn btn-outline btn-sm">Close</button>
+    </div>
+    <div style="text-align: center; background: #000000; border-radius: 0.75rem; padding: 0.5rem; overflow: hidden;">
+      <img id="proofModalImg" src="" alt="Proof" style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Canteen Multi-Selection to Active Match Bill -->
+<div class="modal-overlay" id="canteenModal" onclick="closeCanteenModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 650px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-crease); padding-bottom: 0.75rem;">
+      <div>
+        <h3 style="font-size: 1.35rem; color: #ffffff; margin: 0 0 0.2rem;">Add Menu Items to Match Bill (Multi-Select)</h3>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">
+          Match: <strong id="canteenModalBookingRef" class="font-mono" style="color: var(--turf-green-light);"></strong> • Player: <span id="canteenModalCustomer" style="color: #ffffff; font-weight: 700;"></span>
+        </div>
+      </div>
+      <button onclick="closeCanteenModal()" class="btn btn-outline btn-sm">✕</button>
+    </div>
+
+    <input type="hidden" id="canteenBookingId">
+
+    <!-- Search & Filter Controls -->
+    <div style="margin-bottom: 1rem;">
+      <input type="text" id="modalCanteenSearch" onkeyup="filterModalCanteenItems()" placeholder="Search items (e.g. Cold Drink, Sting, Maggi, Omelette, Ball)..." class="form-control" style="font-size: 0.88rem; margin-bottom: 0.65rem;">
+      <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.35rem;" id="modalCategoryFilterPills">
+        <button type="button" class="btn btn-sm btn-primary modal-cat-pill active" onclick="filterModalCanteenCat('all', this)" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">All</button>
+        <button type="button" class="btn btn-sm btn-outline modal-cat-pill" onclick="filterModalCanteenCat('beverages', this)" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">Cold Drinks & Tea</button>
+        <button type="button" class="btn btn-sm btn-outline modal-cat-pill" onclick="filterModalCanteenCat('snacks', this)" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">Maggi & Snacks</button>
+        <button type="button" class="btn btn-sm btn-outline modal-cat-pill" onclick="filterModalCanteenCat('eggs', this)" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">Eggs & Kitchen</button>
+        <button type="button" class="btn btn-sm btn-outline modal-cat-pill" onclick="filterModalCanteenCat('mocktails', this)" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">Mocktails</button>
+        <button type="button" class="btn btn-sm btn-outline modal-cat-pill" onclick="filterModalCanteenCat('energy_sports', this)" style="font-size: 0.75rem; padding: 0.25rem 0.6rem;">Sports Energy & Balls</button>
+      </div>
+    </div>
+
+    <!-- Product Selection List (Scrollable) -->
+    <div style="flex: 1; overflow-y: auto; padding-right: 0.25rem; max-height: 420px; display: flex; flex-direction: column; gap: 0.65rem;" id="modalCanteenItemsContainer">
+      {% for item in canteen_items %}
+      <div class="modal-canteen-row" data-id="{{ item.id }}" data-name="{{ item.name|lower }}" data-cat="{{ item.category|lower }}" data-price="{{ item.price|float }}" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-crease); border-radius: 0.65rem; transition: background 0.15s, border-color 0.15s;">
+        <div style="flex: 1; padding-right: 0.75rem;">
+          <div style="font-weight: 700; color: #ffffff; font-size: 0.95rem;">{{ item.name }}</div>
+          <div style="font-size: 0.8rem; color: var(--text-dim);">
+            <span class="badge badge-dim" style="font-size: 0.68rem; text-transform: uppercase;">{{ item.category.replace('_', ' ') }}</span>
+            <span class="font-mono" style="color: var(--turf-green-light); font-weight: 800; margin-left: 0.4rem;">₹{{ item.price|int }}</span>
+          </div>
+        </div>
+
+        <!-- Quantity Stepper Controls -->
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <button type="button" onclick="adjustCanteenQty({{ item.id }}, -1)" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.65rem; font-weight: 900; font-size: 0.95rem;">-</button>
+          <span id="canteen_qty_{{ item.id }}" class="font-mono" style="min-width: 28px; text-align: center; font-weight: 900; font-size: 1.05rem; color: #ffffff;">0</span>
+          <button type="button" onclick="adjustCanteenQty({{ item.id }}, 1)" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.65rem; font-weight: 900; font-size: 0.95rem;">+</button>
+          
+          <!-- Quick Presets -->
+          <button type="button" onclick="adjustCanteenQty({{ item.id }}, 2)" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.72rem; color: var(--text-dim);" title="Add 2">+2</button>
+          <button type="button" onclick="adjustCanteenQty({{ item.id }}, 5)" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.45rem; font-size: 0.72rem; color: var(--text-dim);" title="Add 5">+5</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Live Bill Total & Action Footer -->
+    <div style="margin-top: 1rem; border-top: 1px solid var(--border-crease); padding-top: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.5rem; padding: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+        <div style="font-size: 0.88rem; color: var(--text-muted);" id="modalSelectionSummary">
+          No items selected yet. Use + to add items.
+        </div>
+        <div class="font-mono" style="font-size: 1.45rem; font-weight: 900; color: var(--turf-green-light);" id="modalTotalBillDisplay">
+          ₹0
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="button" onclick="closeCanteenModal()" class="btn btn-outline btn-md" style="flex: 1;">Cancel</button>
+        <button type="button" id="btnSubmitCanteenMulti" onclick="submitCanteenMulti()" class="btn btn-primary btn-md" style="flex: 2; font-weight: 900;" disabled>
+          Add Selected Items to Bill
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function switchTab(tabId, btn) {
+  document.querySelectorAll(".tab-pane").forEach(p => p.style.display = "none");
+  document.querySelectorAll(".active-tab").forEach(b => b.classList.remove("active-tab"));
+  document.getElementById(tabId).style.display = "block";
+  btn.classList.add("active-tab");
+}
+
+// Screenshot Zoom Modal
+function viewScreenshot(url, ref) {
+  document.getElementById("proofModalTitle").textContent = "Proof: " + ref;
+  document.getElementById("proofModalImg").src = url;
+  document.getElementById("proofModal").classList.add("active");
+}
+
+function closeProofModal() {
+  document.getElementById("proofModal").classList.remove("active");
+}
+
+// Confirm Booking
+function confirmBooking(id, ref) {
+  if (!confirm(`Confirm match booking for ${ref}? This will notify the customer via WhatsApp.`)) return;
+
+  fetch(`/admin/booking/confirm/${id}`, { method: "POST" })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert(res.message);
+      if (res.client_wa_url) {
+        window.open(res.client_wa_url, "_blank");
+      }
+      location.reload();
+    } else {
+      alert(res.message || "Failed to confirm.");
+    }
+  });
+}
+
+// Cancel Booking (Strict 50% fee & 25% credit)
+function cancelBooking(id, ref) {
+  if (!confirm(`Cancel match booking ${ref}?\n\nStrict Policy: 50% retained fee will be deducted and a 25% future credit promo will be issued to customer.`)) return;
+
+  fetch(`/admin/booking/cancel/${id}`, { method: "POST" })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert(res.message);
+      location.reload();
+    } else {
+      alert(res.message || "Failed to cancel.");
+    }
+  });
+}
+
+// Collect Balance at turf
+function collectBalance(id, ref) {
+  if (!confirm(`Mark remaining balance collected at turf for ${ref}?`)) return;
+
+  fetch(`/admin/booking/collect-balance/${id}`, { method: "POST" })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert(res.message);
+      location.reload();
+    }
+  });
+}
+
+// Multi-Item Canteen POS State
+let selectedCanteenQuantities = {};
+let activeModalCat = "all";
+
+function openAddCanteenModal(bookingId, bookingRef, customerName) {
+  document.getElementById("canteenBookingId").value = bookingId;
+  document.getElementById("canteenModalBookingRef").textContent = bookingRef;
+  document.getElementById("canteenModalCustomer").textContent = customerName;
+
+  // Reset state
+  selectedCanteenQuantities = {};
+  document.querySelectorAll(".modal-canteen-row").forEach(r => {
+    const id = r.getAttribute("data-id");
+    const span = document.getElementById(`canteen_qty_${id}`);
+    if (span) span.textContent = "0";
+    r.style.background = "rgba(255,255,255,0.03)";
+    r.style.borderColor = "var(--border-crease)";
+  });
+
+  const searchInput = document.getElementById("modalCanteenSearch");
+  if (searchInput) searchInput.value = "";
+  activeModalCat = "all";
+  document.querySelectorAll(".modal-cat-pill").forEach(p => p.classList.remove("active", "btn-primary"));
+  const firstPill = document.querySelector(".modal-cat-pill");
+  if (firstPill) firstPill.classList.add("active", "btn-primary");
+
+  filterModalCanteenItems();
+  updateModalTally();
+
+  document.getElementById("canteenModal").classList.add("active");
+}
+
+function closeCanteenModal() {
+  document.getElementById("canteenModal").classList.remove("active");
+}
+
+function adjustCanteenQty(itemId, delta) {
+  const current = selectedCanteenQuantities[itemId] || 0;
+  const next = Math.max(0, current + delta);
+  if (next === 0) {
+    delete selectedCanteenQuantities[itemId];
+  } else {
+    selectedCanteenQuantities[itemId] = next;
+  }
+
+  const span = document.getElementById(`canteen_qty_${itemId}`);
+  if (span) span.textContent = next;
+
+  const row = document.querySelector(`.modal-canteen-row[data-id="${itemId}"]`);
+  if (row) {
+    if (next > 0) {
+      row.style.background = "rgba(16, 185, 129, 0.12)";
+      row.style.borderColor = "var(--turf-green-light)";
+    } else {
+      row.style.background = "rgba(255,255,255,0.03)";
+      row.style.borderColor = "var(--border-crease)";
+    }
+  }
+
+  updateModalTally();
+}
+
+function filterModalCanteenCat(cat, btn) {
+  activeModalCat = cat;
+  document.querySelectorAll(".modal-cat-pill").forEach(p => {
+    p.classList.remove("active", "btn-primary");
+    p.classList.add("btn-outline");
+  });
+  btn.classList.add("active", "btn-primary");
+  btn.classList.remove("btn-outline");
+  filterModalCanteenItems();
+}
+
+function filterModalCanteenItems() {
+  const q = (document.getElementById("modalCanteenSearch").value || "").toLowerCase().trim();
+  document.querySelectorAll(".modal-canteen-row").forEach(r => {
+    const name = r.getAttribute("data-name") || "";
+    const cat = r.getAttribute("data-cat") || "";
+    const matchCat = (activeModalCat === "all" || cat === activeModalCat);
+    const matchQuery = (!q || name.includes(q) || cat.includes(q));
+
+    if (matchCat && matchQuery) {
+      r.style.display = "flex";
+    } else {
+      r.style.display = "none";
+    }
+  });
+}
+
+function updateModalTally() {
+  let totalCost = 0;
+  let totalCount = 0;
+  let itemsSummary = [];
+
+  for (const [idStr, qty] of Object.entries(selectedCanteenQuantities)) {
+    if (qty > 0) {
+      const row = document.querySelector(`.modal-canteen-row[data-id="${idStr}"]`);
+      if (row) {
+        const price = parseFloat(row.getAttribute("data-price") || 0);
+        const name = row.querySelector("div > div:first-child").textContent.trim();
+        totalCost += (price * qty);
+        totalCount += qty;
+        itemsSummary.append ? itemsSummary.append(`${qty}x ${name}`) : itemsSummary.push(`${qty}x ${name}`);
+      }
+    }
+  }
+
+  const billDisplay = document.getElementById("modalTotalBillDisplay");
+  const summaryDisplay = document.getElementById("modalSelectionSummary");
+  const btnSubmit = document.getElementById("btnSubmitCanteenMulti");
+
+  if (billDisplay) billDisplay.textContent = `₹${Math.round(totalCost)}`;
+  if (summaryDisplay) {
+    if (totalCount > 0) {
+      summaryDisplay.innerHTML = `<strong style="color: #ffffff;">${totalCount} items:</strong> ${itemsSummary.join(', ')}`;
+    } else {
+      summaryDisplay.textContent = "No items selected yet. Use + to add items.";
+    }
+  }
+
+  if (btnSubmit) {
+    btnSubmit.disabled = (totalCount === 0);
+    btnSubmit.textContent = totalCount > 0 ? `Add ${totalCount} Items (₹${Math.round(totalCost)}) to Match Bill` : `Add Selected Items to Bill`;
+  }
+}
+
+function submitCanteenMulti() {
+  const bookingId = document.getElementById("canteenBookingId").value;
+  const items = [];
+
+  for (const [idStr, qty] of Object.entries(selectedCanteenQuantities)) {
+    if (qty > 0) {
+      items.push({ item_id: parseInt(idStr), quantity: qty });
+    }
+  }
+
+  if (items.length === 0) {
+    alert("Please select at least one canteen item with quantity > 0.");
+    return;
+  }
+
+  const btnSubmit = document.getElementById("btnSubmitCanteenMulti");
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "Adding to Match Tab...";
+  }
+
+  fetch(`/admin/booking/add-canteen/${bookingId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items: items })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert(res.message);
+      closeCanteenModal();
+      location.reload();
+    } else {
+      alert(res.message || "Failed to add items.");
+      if (btnSubmit) btnSubmit.disabled = false;
+    }
+  })
+  .catch(err => {
+    alert("Network error updating match bill: " + err);
+    if (btnSubmit) btnSubmit.disabled = false;
+  });
+}
+</script>
+{% endblock %}

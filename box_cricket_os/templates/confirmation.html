@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="padding: 2.5rem 0;">
+  <div style="text-align: center; max-width: 650px; margin: 0 auto 2rem;">
+    {% if booking.booking_status == 'confirmed' %}
+    <span class="badge badge-turf" style="font-size: 0.95rem; padding: 0.4rem 1rem; margin-bottom: 0.75rem;">
+      <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-check"></use></svg>
+      BOOKING CONFIRMED & VERIFIED
+    </span>
+    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Match Reserved!</h1>
+    <p style="color: var(--text-muted);">Your slot payment has been verified. Present this pass at the turf entrance.</p>
+    {% else %}
+    <span class="badge badge-danger" style="font-size: 0.95rem; padding: 0.4rem 1rem; margin-bottom: 0.75rem;">
+      <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-clock"></use></svg>
+      IN PROCESS - PROOF UNDER VERIFICATION
+    </span>
+    <h1 style="font-size: 2.25rem; margin-bottom: 0.5rem;">Payment Proof Received!</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Your transaction screenshot is being reviewed by turf management. The slot is locked in system under <strong style="color: #f87171;">RED (In-Process)</strong>.
+    </p>
+    {% endif %}
+  </div>
+
+  <!-- DIGITAL MATCH PASS CONTAINER -->
+  <div class="match-pass-container">
+    <div class="match-pass-header">
+      <div style="display: flex; align-items: center; gap: 0.85rem;">
+        <img src="{{ url_for('static', filename='img/brand_logo_circle.png') }}" alt="Logo" style="width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--gold-accent);">
+        <div>
+          <div style="font-weight: 900; font-size: 1.25rem; color: #ffffff;">RUNBHOOMI BOX CRICKET</div>
+          <div style="font-size: 0.75rem; color: var(--turf-green-light); letter-spacing: 0.05em;">DIGITAL TURF PASS</div>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <span class="badge {% if booking.booking_status == 'confirmed' %}badge-turf{% else %}badge-danger{% endif %} font-mono">
+          {{ booking.booking_status.upper() }}
+        </span>
+      </div>
+    </div>
+
+    <div class="pass-body">
+      <!-- Player & Booking Reference -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed var(--border-boundary); padding-bottom: 1.25rem; margin-bottom: 1.25rem;">
+        <div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Captain / Player Name</span>
+          <h3 style="font-size: 1.4rem; color: #ffffff;">{{ booking.customer_name }}</h3>
+          <div style="font-size: 0.85rem; color: var(--text-dim);">Contact: +91 {{ booking.customer_phone }} (Age: {{ booking.age }})</div>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Booking Reference</span>
+          <div style="font-size: 1.2rem; font-weight: 900; color: var(--turf-green-light); font-family: var(--font-mono);">
+            {{ booking.booking_ref }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Match Slot Details -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+        <div style="background: rgba(255, 255, 255, 0.02); padding: 0.85rem; border-radius: 0.65rem; border: 1px solid var(--border-boundary);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Sport & Arena</div>
+          <div style="font-weight: 800; font-size: 1.05rem; color: #ffffff;">{{ booking.sport_name }}</div>
+          <div style="font-size: 0.75rem; color: var(--turf-green);">Synthetic Pitch Turf</div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.02); padding: 0.85rem; border-radius: 0.65rem; border: 1px solid var(--border-boundary);">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Date & Timing</div>
+          <div style="font-weight: 800; font-size: 1.05rem; color: #ffffff;">{{ booking.booking_date }}</div>
+          <div style="font-size: 0.85rem; color: var(--flame-orange); font-family: var(--font-mono); font-weight: 700;">
+            {{ format_slot_range_12hr(booking.start_time, booking.end_time) }} ({{ booking.duration_hours }}h)
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Breakdown -->
+      <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid var(--border-turf); border-radius: 0.85rem; padding: 1.25rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+          <span style="color: var(--text-muted);">Total Match Amount:</span>
+          <strong style="color: #ffffff;">₹{{ booking.total_amount|int }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.4rem;">
+          <span style="color: var(--text-muted);">Advance Token Paid (50%):</span>
+          <strong style="color: var(--turf-green-light);">₹{{ booking.advance_paid|int }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 800; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 0.6rem; color: {% if booking.balance_due > 0 %}#f87171{% else %}var(--turf-green-light){% endif %};">
+          <span>Balance Due at Turf Kickoff:</span>
+          <span class="font-mono">₹{{ booking.balance_due|int }}</span>
+        </div>
+      </div>
+
+      <!-- Pass Verification QR Code -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: #070b12; border-radius: 0.75rem; border: 1px solid var(--border-boundary);">
+        <div>
+          <div style="font-weight: 700; color: #ffffff; font-size: 0.9rem;">Digital Security QR</div>
+          <div style="font-size: 0.75rem; color: var(--text-dim); max-width: 250px;">
+            Scan at ground entrance to verify match allotment.
+          </div>
+        </div>
+        <img src="{{ pass_qr_base64 }}" alt="Pass QR" style="width: 80px; height: 80px; border-radius: 0.5rem; background: #ffffff; padding: 4px;">
+      </div>
+
+      <div style="margin-top: 1.25rem; font-size: 0.75rem; color: var(--text-dim); text-align: center;">
+        Venue: {{ TURF_ADDRESS }} | {{ LEGAL_ENTITY }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 2rem;">
+    <!-- DIRECT ADMIN WHATSAPP ALERT (PHASE 3 REQUIREMENT) -->
+    <a href="{{ admin_wa_url }}" target="_blank" class="btn btn-primary btn-lg">
+      <svg class="icon icon-md"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
+      Notify Admin on WhatsApp (+91 88589 08825)
+    </a>
+
+    <!-- Download / Print Pass -->
+    <a href="{{ url_for('match_voucher', booking_ref=booking.booking_ref) }}" target="_blank" class="btn btn-outline btn-lg">
+      <svg class="icon icon-md"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-download"></use></svg>
+      Print / Save Digital Receipt
+    </a>
+  </div>
+
+  <!-- Community Hubs Reminder -->
+  <div style="max-width: 600px; margin: 3rem auto 0; text-align: center; padding: 1.5rem; background: rgba(13, 21, 34, 0.6); border: 1px solid var(--border-boundary); border-radius: 1rem;">
+    <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Join the Runbhoomi Community</h4>
+    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+      Get notified of flash slot openings, weekend tournament brackets, and player highlights.
+    </p>
+    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+      <a href="{{ WHATSAPP_COMMUNITY_URL }}" target="_blank" class="btn btn-outline btn-sm">
+        <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
+        Join WhatsApp Community
+      </a>
+      <a href="{{ INSTAGRAM_URL }}" target="_blank" class="btn btn-outline btn-sm">
+        <svg class="icon icon-sm text-flame"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-flame"></use></svg>
+        Follow on Instagram
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

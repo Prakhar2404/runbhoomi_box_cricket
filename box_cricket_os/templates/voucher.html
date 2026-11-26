@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Match Pass & Receipt - {{ booking.booking_ref }} - Runbhoomi Box Cricket</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    body { background: #070b12; padding: 2rem 1rem; }
+    .voucher-card {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #0d1522;
+      border: 2px solid #10b981;
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    @media print {
+      body { background: #ffffff !important; padding: 0 !important; }
+      .voucher-card {
+        border: 2px solid #000000 !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="text-align: center; margin-bottom: 1.5rem;">
+    <button onclick="window.print()" class="btn btn-primary btn-lg">
+      Print / Save PDF Receipt
+    </button>
+    {% if portal_type == 'admin' %}
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline btn-lg" style="margin-left: 0.5rem;">
+      Back to Operations Cockpit
+    </a>
+    {% else %}
+    <a href="{{ url_for('booking_confirmation', booking_ref=booking.booking_ref) }}" class="btn btn-outline btn-lg" style="margin-left: 0.5rem;">
+      Back to Confirmation
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="voucher-card">
+    <!-- Top Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(16, 185, 129, 0.4); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <img src="{{ url_for('static', filename='img/brand_logo_circle.png') }}" alt="Logo" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--gold-accent);">
+        <div>
+          <h1 style="font-size: 1.6rem; margin: 0; line-height: 1.1;">RUNBHOOMI BOX CRICKET</h1>
+          <div style="font-size: 0.82rem; color: var(--turf-green-light); font-weight: 700; margin-top: 0.2rem;">
+            OFFICIAL MATCH PASS & PAYMENT RECEIPT
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-dim);">
+            {{ LEGAL_ENTITY }}
+          </div>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <span class="badge {% if booking.booking_status == 'confirmed' %}badge-turf{% else %}badge-danger{% endif %} font-mono" style="font-size: 0.95rem; padding: 0.4rem 0.85rem;">
+          {{ booking.booking_status.upper() }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Booking Ref & Date -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 0.75rem;">
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Booking Reference</div>
+        <div style="font-size: 1.25rem; font-weight: 900; font-family: var(--font-mono); color: var(--turf-green-light);">
+          {{ booking.booking_ref }}
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Issue Timestamp</div>
+        <div style="font-size: 0.95rem; color: #ffffff;">{{ booking.created_at }}</div>
+      </div>
+    </div>
+
+    <!-- Player & Sport Details -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Captain / Customer</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #ffffff;">{{ booking.customer_name }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Phone: +91 {{ booking.customer_phone }}</div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Allocated Arena</div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #ffffff;">{{ booking.sport_name }}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Match Date: {{ booking.booking_date }}</div>
+        <div style="font-size: 0.85rem; color: var(--flame-orange); font-weight: 700;">
+          Slot: {{ format_slot_range_12hr(booking.start_time, booking.end_time) }} ({{ booking.duration_hours }}h)
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial Breakdown Table -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--border-boundary); text-align: left; color: var(--text-muted); font-size: 0.8rem;">
+          <th style="padding: 0.5rem 0;">Item Description</th>
+          <th style="padding: 0.5rem 0; text-align: right;">Amount (INR)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px dashed var(--border-boundary);">
+          <td style="padding: 0.75rem 0;">
+            Match Slot Tariff ({{ booking.duration_hours }} Hours @ {{ booking.sport_name }})
+          </td>
+          <td style="padding: 0.75rem 0; text-align: right; font-weight: 700;">₹{{ booking.base_rate|int }}</td>
+        </tr>
+        {% if booking.discount_amount > 0 %}
+        <tr style="border-bottom: 1px dashed var(--border-boundary); color: var(--turf-green-light);">
+          <td style="padding: 0.75rem 0;">
+            Promotional / Credit Discount ({{ booking.promo_code }})
+          </td>
+          <td style="padding: 0.75rem 0; text-align: right; font-weight: 700;">-₹{{ booking.discount_amount|int }}</td>
+        </tr>
+        {% endif %}
+
+        {% for order in canteen_orders %}
+        <tr style="border-bottom: 1px dashed var(--border-boundary); color: #cbd5e1;">
+          <td style="padding: 0.5rem 0;">
+            Canteen POS: {{ order.quantity }}x {{ order.item_name }}
+          </td>
+          <td style="padding: 0.5rem 0; text-align: right; font-weight: 700;">+₹{{ order.total_price|int }}</td>
+        </tr>
+        {% endfor %}
+
+        <tr style="border-top: 2px solid rgba(255,255,255,0.2); font-size: 1.05rem;">
+          <td style="padding: 0.75rem 0; font-weight: 800;">Total Match & Service Bill:</td>
+          <td style="padding: 0.75rem 0; text-align: right; font-weight: 900; color: #ffffff;">₹{{ booking.total_amount|int }}</td>
+        </tr>
+        <tr style="color: var(--turf-green-light);">
+          <td style="padding: 0.5rem 0; font-weight: 700;">Advance Token Paid (50%):</td>
+          <td style="padding: 0.5rem 0; text-align: right; font-weight: 800;">₹{{ booking.advance_paid|int }}</td>
+        </tr>
+        <tr style="font-size: 1.15rem; color: {% if booking.balance_due > 0 %}#f87171{% else %}var(--turf-green-light){% endif %}; font-weight: 900;">
+          <td style="padding: 0.75rem 0;">Balance Due at Turf:</td>
+          <td style="padding: 0.75rem 0; text-align: right; font-family: var(--font-mono);">₹{{ booking.balance_due|int }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Footer Security & Address -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-boundary); padding-top: 1.25rem;">
+      <div style="font-size: 0.78rem; color: var(--text-dim); max-width: 400px; line-height: 1.5;">
+        <strong>Turf Ground Address:</strong><br>
+        {{ TURF_ADDRESS }}<br>
+        Helplines: {{ HELPLINE_PRIMARY }} | {{ HELPLINE_OPERATIONS }}<br>
+        UPI Payee: {{ UPI_PAYEE_NAME }} ({{ UPI_ID }})
+      </div>
+      <div>
+        <img src="{{ pass_qr_base64 }}" alt="QR" style="width: 85px; height: 85px; background: #ffffff; padding: 4px; border-radius: 6px;">
+      </div>
+    </div>
+  </div>
+</body>
+</html>

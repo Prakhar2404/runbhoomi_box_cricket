@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Player Sign In & Account Registration - {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2.5rem 0 5rem; max-width: 620px;">
+
+  <!-- BRAND HEADER -->
+  <div style="text-align: center; margin-bottom: 2rem;">
+    <img src="{{ url_for('static', filename='img/brand_logo_circle.png') }}" alt="{{ BRAND_NAME }}" style="width: 80px; height: 80px; border-radius: 50%; border: 2.5px solid var(--turf-green); box-shadow: 0 0 25px var(--turf-green-glow); margin-bottom: 1rem;">
+    <div class="hero-tag" style="margin-bottom: 0.5rem;">
+      <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-user"></use></svg>
+      PLAYER AUTHENTICATION PORTAL
+    </div>
+    <h1 style="font-size: 2.15rem; color: #ffffff; font-weight: 900; line-height: 1.2; margin-bottom: 0.5rem;">
+      Customer Account & <span class="text-turf">Booking Gate</span>
+    </h1>
+    <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">
+      Sign in or create your player profile with a secure password (minimum 6 characters) to unlock the live slot booking timetable, hold guarantees, and match passes.
+    </p>
+
+    <!-- STRICT ROLE ISOLATION NOTICE -->
+    <div style="margin-top: 1.25rem; background: rgba(16, 185, 129, 0.08); border: 1px solid var(--border-turf); border-radius: 8px; padding: 0.75rem 1rem; text-align: left; display: flex; align-items: center; gap: 0.75rem;">
+      <svg class="icon icon-sm text-turf" style="flex-shrink: 0;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+      <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
+        <strong style="color: var(--turf-green-light);">Player Privacy & Safety:</strong> Customer profiles have zero access to administrative controls. All administrative and operational tariffs are strictly restricted to turf staff.
+      </div>
+    </div>
+  </div>
+
+  <!-- FLASH MESSAGES -->
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div style="margin-bottom: 1.5rem;">
+      {% for msg in messages %}
+      <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 0.5rem;">
+        {{ msg }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- AUTHENTICATION CARD -->
+  <div class="card card-stadium-glow" style="padding: 2rem; background: linear-gradient(135deg, rgba(12, 20, 32, 0.95) 0%, rgba(7, 11, 18, 0.98) 100%); border: 1.5px solid var(--border-turf);">
+
+    <!-- TAB SELECTOR -->
+    <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-crease); padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+      <button type="button" id="tabBtnLogin" onclick="switchAuthTab('login')" class="btn {% if active_tab != 'register' %}btn-primary{% else %}btn-outline{% endif %} btn-sm" style="flex: 1; font-weight: 800;">
+        Existing Player Sign In
+      </button>
+      <button type="button" id="tabBtnRegister" onclick="switchAuthTab('register')" class="btn {% if active_tab == 'register' %}btn-primary{% else %}btn-outline{% endif %} btn-sm" style="flex: 1; font-weight: 800;">
+        New Player Registration
+      </button>
+    </div>
+
+    <!-- TAB 1: EXISTING PLAYER SIGN IN -->
+    <div id="authLoginPane" style="display: {% if active_tab != 'register' %}block{% else %}none{% endif %};">
+      <form action="{{ url_for('customer_login_page') }}" method="POST">
+        <input type="hidden" name="action" value="login">
+        <input type="hidden" name="next" value="{{ next_url }}">
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label">Contact Number or Email</label>
+          <input type="text" name="phone_or_email" class="form-control" placeholder="10-digit mobile number or email" required autofocus>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Account Password (min 6 characters)</label>
+          <input type="password" name="password" class="form-control" placeholder="Enter password (minimum 6 chars)" minlength="6" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1rem; font-weight: 900; padding: 0.85rem; box-shadow: 0 0 20px var(--turf-green-glow);">
+          Sign In & Proceed to Booking →
+        </button>
+      </form>
+    </div>
+
+    <!-- TAB 2: NEW PLAYER REGISTRATION -->
+    <div id="authRegisterPane" style="display: {% if active_tab == 'register' %}block{% else %}none{% endif %};">
+      <form action="{{ url_for('customer_login_page') }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="register">
+        <input type="hidden" name="next" value="{{ next_url }}">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label class="form-label">Full Name <span style="color: var(--flame-orange);">*</span></label>
+            <input type="text" name="name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+          </div>
+          <div>
+            <label class="form-label">Contact Number <span style="color: var(--flame-orange);">*</span></label>
+            <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile" pattern="[0-9]{10}" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label class="form-label">Age <span style="color: var(--flame-orange);">*</span></label>
+            <input type="number" name="age" class="form-control" placeholder="Age (e.g. 24)" min="8" max="80" required>
+          </div>
+          <div>
+            <label class="form-label">Gender <span style="color: var(--flame-orange);">*</span></label>
+            <select name="gender" class="form-control" required>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Email Address (Optional)</label>
+          <input type="email" name="email" class="form-control" placeholder="player@example.com">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Create Password <span style="color: var(--flame-orange);">* (min 6 characters)</span></label>
+          <input type="password" name="password" class="form-control" placeholder="At least 6 characters" minlength="6" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Profile Avatar (Optional)</label>
+          <input type="file" name="avatar" class="form-control" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1rem; font-weight: 900; padding: 0.85rem; box-shadow: 0 0 20px var(--turf-green-glow);">
+          Create Player Account & Start Booking →
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- FOOTER & STAFF SWITCHER -->
+  <div style="text-align: center; margin-top: 2rem;">
+    <p style="font-size: 0.88rem; color: var(--text-dim); margin-bottom: 0.75rem;">
+      Ground Helplines: <a href="tel:{{ HELPLINE_PRIMARY }}" style="color: var(--turf-green-light); font-weight: 700;">{{ HELPLINE_PRIMARY }}</a> | Support: 10 AM - 8 PM
+    </p>
+    {% if portal_type == 'admin' %}
+    <div style="padding-top: 1rem; border-top: 1px solid var(--border-crease);">
+      <a href="{{ url_for('admin_login') }}" style="font-size: 0.84rem; color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;">
+        <svg class="icon icon-sm text-flame"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+        Are you Turf Staff or Partner? <strong>Admin & Partner Login →</strong>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function switchAuthTab(tab) {
+  const btnLogin = document.getElementById('tabBtnLogin');
+  const btnRegister = document.getElementById('tabBtnRegister');
+  const paneLogin = document.getElementById('authLoginPane');
+  const paneRegister = document.getElementById('authRegisterPane');
+
+  if (tab === 'login') {
+    btnLogin.className = 'btn btn-primary btn-sm';
+    btnRegister.className = 'btn btn-outline btn-sm';
+    paneLogin.style.display = 'block';
+    paneRegister.style.display = 'none';
+  } else {
+    btnLogin.className = 'btn btn-outline btn-sm';
+    btnRegister.className = 'btn btn-primary btn-sm';
+    paneLogin.style.display = 'none';
+    paneRegister.style.display = 'block';
+  }
+}
+</script>
+{% endblock %}
+

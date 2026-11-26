@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}In-House Canteen & Kitchen Menu - {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2.5rem 0 5rem;">
+
+  <!-- HERO SECTION -->
+  <div style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem;">
+    <div class="hero-tag" style="margin-bottom: 0.75rem;">
+      <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
+      STAFF & PARTNER CONCESSION INVENTORY
+    </div>
+    <h1 style="font-size: 2.6rem; color: #ffffff; font-weight: 900; line-height: 1.15; margin-bottom: 0.75rem;">
+      Canteen POS & <span class="text-turf">Match Fuel</span> Catalog
+    </h1>
+    <p style="font-size: 1.05rem; color: var(--text-muted); line-height: 1.6;">
+      Internal concession product ledger. Admin and partners can add any of these items directly to a player's running match bill from the Command Center.
+    </p>
+
+    <!-- HYGIENE & QUALITY GUARANTEE BANNER (MANDATORY NOTICE) -->
+    <div class="card card-stadium-glow" style="margin-top: 1.5rem; padding: 1.25rem 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(12, 20, 32, 0.95) 100%); border: 1.5px solid var(--border-turf); text-align: left; display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg class="icon icon-md text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+      </div>
+      <div>
+        <div style="font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--turf-green-light); margin-bottom: 0.2rem;">
+          Hygiene & Quality Standard Guarantee
+        </div>
+        <p style="margin: 0; font-size: 0.96rem; color: #ffffff; font-weight: 600; line-height: 1.45;">
+          {{ CANTEEN_HYGIENE_NOTICE }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH & CATEGORY FILTER TABS -->
+  <div style="margin-bottom: 2rem;">
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem;">
+      <button class="btn btn-primary btn-sm category-tab active" onclick="filterCanteen('all', this)">
+        All Products ({{ total_count }})
+      </button>
+      <button class="btn btn-outline btn-sm category-tab" onclick="filterCanteen('eggs', this)">
+        Eggs & Kitchen
+      </button>
+      <button class="btn btn-outline btn-sm category-tab" onclick="filterCanteen('snacks', this)">
+        Maggie, Pasta & Snacks
+      </button>
+      <button class="btn btn-outline btn-sm category-tab" onclick="filterCanteen('beverages', this)">
+        Chai & Cold Drinks
+      </button>
+      <button class="btn btn-outline btn-sm category-tab" onclick="filterCanteen('mocktails', this)">
+        Mocktails
+      </button>
+      <button class="btn btn-outline btn-sm category-tab" onclick="filterCanteen('smokes', this)">
+        Smokes & Lounge
+      </button>
+      <button class="btn btn-outline btn-sm category-tab" onclick="filterCanteen('energy_sports', this)">
+        Sports Energy & Gear
+      </button>
+    </div>
+
+    <div style="max-width: 480px; margin: 0 auto; position: relative;">
+      <input type="text" id="canteenSearchInput" onkeyup="searchCanteenItems()" placeholder="Search menu (e.g. Maggie, Omelette, Mojito, Chai)..." class="form-control" style="padding-left: 2.75rem; font-size: 0.95rem;">
+      <div style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-dim);">
+        <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-search"></use></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORIZED MENU LISTINGS -->
+  {% for cat_key, cat_data in grouped_menu.items() %}
+  <div class="canteen-category-block" data-category="{{ cat_key }}" style="margin-bottom: 3rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-crease); padding-bottom: 0.75rem;">
+      <h3 style="font-size: 1.45rem; color: #ffffff; font-weight: 800; display: flex; align-items: center; gap: 0.6rem;">
+        <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--turf-green-light);"></span>
+        {{ cat_data.title }}
+      </h3>
+      <span class="badge badge-turf" style="font-size: 0.78rem;">{{ cat_data.products|length }} items</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;">
+      {% for item in cat_data.products %}
+      <div class="card canteen-item-card" data-category="{{ item.category }}" data-name="{{ item.name|lower }}" style="display: flex; flex-direction: column; justify-content: space-between; padding: 1.25rem; transition: transform 0.15s ease, border-color 0.15s ease;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <span class="badge badge-dim" style="font-size: 0.72rem; text-transform: uppercase;">{{ item.category.replace('_', ' ') }}</span>
+            <span style="font-size: 0.76rem; color: var(--turf-green-light); font-weight: 700;">Fresh Available</span>
+          </div>
+          <h4 style="font-size: 1.05rem; color: #ffffff; margin-bottom: 0.35rem; font-weight: 700; line-height: 1.35;">
+            {{ item.name }}
+          </h4>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-crease); padding-top: 0.75rem; margin-top: 0.85rem;">
+          <div>
+            <span style="font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; display: block;">Price</span>
+            <span class="font-mono" style="font-size: 1.3rem; font-weight: 900; color: var(--turf-green-light);">
+              ₹{{ item.price|int }}
+            </span>
+          </div>
+          <a href="https://wa.me/918858908825?text={{ ('Hi Aditya Goyal! I want to order ' ~ item.name ~ ' at Runbhoomi Box Cricket Canteen.')|urlencode }}" target="_blank" class="btn btn-outline btn-sm" style="font-size: 0.8rem; padding: 0.35rem 0.7rem; border-color: rgba(16, 185, 129, 0.4);">
+            <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
+            Order
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- FOOTER NOTICE CARD -->
+  <div class="card" style="padding: 1.75rem; background: rgba(12, 20, 32, 0.8); text-align: center; border: 1px dashed var(--border-turf); margin-top: 2rem;">
+    <h4 style="color: #ffffff; font-size: 1.2rem; margin-bottom: 0.4rem;">Counter Ordering & Turf Tab</h4>
+    <p style="color: var(--text-muted); font-size: 0.92rem; max-width: 650px; margin: 0 auto 1rem;">
+      Playing a match today? You can ask the ground admin or staff to add any of these canteen items directly to your active match bill. Pay together during balance settlement at the turf!
+    </p>
+    <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+      {% if portal_type == 'admin' %}
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-sm">
+        <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+        Return to Cockpit
+      </a>
+      {% else %}
+      <a href="{{ url_for('booking_page') }}" class="btn btn-primary btn-sm">
+        <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
+        Book a Match Slot
+      </a>
+      {% endif %}
+      <a href="tel:{{ HELPLINE_PRIMARY }}" class="btn btn-outline btn-sm">
+        <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-phone"></use></svg>
+        Call Canteen Desk ({{ HELPLINE_PRIMARY }})
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function filterCanteen(category, btnElement) {
+  // Update button classes
+  document.querySelectorAll('.category-tab').forEach(b => {
+    b.classList.remove('btn-primary', 'active');
+    b.classList.add('btn-outline');
+  });
+  btnElement.classList.remove('btn-outline');
+  btnElement.classList.add('btn-primary', 'active');
+
+  // Filter sections and items
+  const blocks = document.querySelectorAll('.canteen-category-block');
+  const cards = document.querySelectorAll('.canteen-item-card');
+
+  if (category === 'all') {
+    blocks.forEach(b => b.style.display = 'block');
+    cards.forEach(c => c.style.display = 'flex');
+  } else {
+    blocks.forEach(b => {
+      if (b.dataset.category === category) {
+        b.style.display = 'block';
+      } else {
+        b.style.display = 'none';
+      }
+    });
+    cards.forEach(c => {
+      if (c.dataset.category === category) {
+        c.style.display = 'flex';
+      } else {
+        c.style.display = 'none';
+      }
+    });
+  }
+}
+
+function searchCanteenItems() {
+  const query = document.getElementById('canteenSearchInput').value.toLowerCase().trim();
+  const cards = document.querySelectorAll('.canteen-item-card');
+  const blocks = document.querySelectorAll('.canteen-category-block');
+
+  if (!query) {
+    cards.forEach(c => c.style.display = 'flex');
+    blocks.forEach(b => b.style.display = 'block');
+    return;
+  }
+
+  blocks.forEach(b => {
+    let hasVisibleCard = false;
+    const catCards = b.querySelectorAll('.canteen-item-card');
+    catCards.forEach(c => {
+      const name = c.dataset.name || '';
+      if (name.includes(query)) {
+        c.style.display = 'flex';
+        hasVisibleCard = true;
+      } else {
+        c.style.display = 'none';
+      }
+    });
+    b.style.display = hasVisibleCard ? 'block' : 'none';
+  });
+}
+</script>
+{% endblock %}

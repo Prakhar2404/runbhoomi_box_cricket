@@ -1,0 +1,508 @@
+{% extends "base.html" %}
+
+{% block title %}Match Slot Booking - {{ BRAND_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2.5rem 0 4rem;">
+  <!-- Booking Header -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
+    <div>
+      <div class="hero-tag" style="margin-bottom: 0.5rem;">
+        <svg class="icon icon-sm text-flame"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-clock"></use></svg>
+        ONLINE TURF SCHEDULER
+      </div>
+      <h1 style="font-size: 2.75rem;">Match Slot Booking</h1>
+      <p style="color: var(--text-muted); font-size: 1rem; max-width: 650px;">
+        Pick your sport, select match date, and click your starting & ending slots continuously. Real-time availability with zero gateway fees.
+      </p>
+    </div>
+
+    <!-- Quick Legend -->
+    <div class="slot-legend card" style="padding: 0.75rem 1.25rem; border-radius: 9999px;">
+      <div class="legend-item">
+        <span class="legend-dot available"></span>
+        <span>🟢 Available</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot held"></span>
+        <span>🟡 In Checkout (10m Hold)</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot booked"></span>
+        <span>🔴 Booked / In-Process</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mandatory Official Turf Pricing Notice -->
+  <div class="notice-box notice-cleaning" style="margin: 1.5rem 0 2rem;">
+    <div style="display: flex; align-items: flex-start; gap: 0.9rem; flex-wrap: wrap;">
+      <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--turf-grass-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg class="icon icon-md text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-floodlight"></use></svg>
+      </div>
+      <div style="flex: 1; min-width: 260px;">
+        <div style="color: var(--turf-grass-light); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>Official Turf Pricing Notice</span>
+          <span class="badge badge-dim" style="font-size: 0.68rem; padding: 0.15rem 0.5rem;">Transparent Tariffs</span>
+        </div>
+        <div style="color: #ffffff; font-size: 0.98rem; font-weight: 600; line-height: 1.45;">
+          {{ CLEANING_LIGHTING_NOTICE }}
+        </div>
+        <div style="font-size: 0.82rem; color: var(--chalk-dim); margin-top: 0.25rem;">
+          Day slots (06:00 AM - 06:00 PM) use natural sunlight, while Night slots (06:00 PM - 12:00 AM) utilize competition-grade high-lux LED illumination.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player Onboarding Status Bar -->
+  {% if current_user %}
+  <div class="card card-stadium-glow" style="margin: 1.5rem 0; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; background: linear-gradient(135deg, rgba(6,78,59,0.25) 0%, rgba(12,20,32,0.95) 100%);">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); border: 2px solid var(--turf-green-bright); display: flex; align-items: center; justify-content: center;">
+        <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-user"></use></svg>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--turf-green-light); font-weight: 800;">ACTIVE PLAYER PROFILE</div>
+        <div style="font-weight: 800; color: #ffffff; font-size: 1.1rem;">{{ current_user.name }} (Contact: +91 {{ current_user.phone }})</div>
+      </div>
+    </div>
+    <button onclick="logoutCustomer()" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 0.35rem 0.75rem;">
+      Switch Player Profile
+    </button>
+  </div>
+  {% else %}
+  <div class="card card-stadium-glow" style="margin: 1.5rem 0; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; background: rgba(16, 185, 129, 0.06); border: 1.5px solid var(--turf-green);">
+    <div>
+      <div style="font-weight: 800; color: #ffffff; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-user"></use></svg>
+        First-Time Player Registration
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+        Register your profile once to auto-fill match passes and unlock 10-minute hold guarantees.
+      </div>
+    </div>
+    <button onclick="openPlayerRegisterModal()" class="btn btn-primary btn-sm">
+      Register Player Profile
+    </button>
+  </div>
+  {% endif %}
+
+  <!-- 1. Multi-Sport Selection Tabs -->
+  <div style="margin-top: 2rem;">
+    <label style="font-size: 0.85rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">
+      1. Select Sport Facility:
+    </label>
+    <div class="sports-tabs" id="sportsTabs">
+      {% for s in sports %}
+      <div class="sport-tab {% if loop.first %}active{% endif %}" data-sport-id="{{ s.id }}" data-sport-slug="{{ s.slug }}">
+        <svg class="icon icon-md"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-{{ s.icon_name }}"></use></svg>
+        <span>{{ s.name }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 2. Match Date Picker Row -->
+  <div style="margin-bottom: 1.5rem;">
+    <label style="font-size: 0.85rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.5rem;">
+      2. Choose Match Date:
+    </label>
+    <div class="date-selector-row" id="datePickerRow">
+      {% for d in date_pills %}
+      <div class="date-pill {% if loop.first %}active{% endif %}" data-date="{{ d.date_str }}">
+        <span class="day-name">{{ d.day_name }}</span>
+        <span class="day-number">{{ d.day_num }}</span>
+        <span style="font-size: 0.72rem; color: var(--text-dim);">{{ d.month_name }}</span>
+        {% if d.is_weekend %}
+        <span style="font-size: 0.62rem; color: var(--flame-orange); font-weight: 800; margin-top: 0.15rem;">WEEKEND</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 3. Slot Controls Bar & 12-Hour Period Filters -->
+  <div class="slot-control-bar">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <svg class="icon icon-md text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-clock"></use></svg>
+      <div>
+        <span style="font-weight: 800; color: #ffffff;" id="currentSportLabel">Box Cricket</span> |
+        <span style="color: var(--turf-green-bright); font-weight: 800;" id="currentDateLabel">{{ date_pills[0].date_str }}</span>
+      </div>
+    </div>
+    <div style="font-size: 0.85rem; color: var(--text-muted);">
+      12-Hour Continuous Match Slots (Select start & finish)
+    </div>
+  </div>
+
+  <!-- Time Period Selector Pills (Morning / Noon / Evening / Night) -->
+  <div class="period-filter-bar">
+    <button type="button" class="period-btn active" data-period="all">
+      All Timings (06:00 AM - 12:00 AM)
+    </button>
+    <button type="button" class="period-btn" data-period="Morning">
+      Morning (06:00 AM - 12:00 PM)
+    </button>
+    <button type="button" class="period-btn" data-period="Noon">
+      Noon (12:00 PM - 04:00 PM)
+    </button>
+    <button type="button" class="period-btn" data-period="Evening">
+      Evening (04:00 PM - 07:00 PM)
+    </button>
+    <button type="button" class="period-btn" data-period="Night">
+      Night Floodlights (07:00 PM - 12:00 AM)
+    </button>
+  </div>
+
+  <!-- Pricing Variation Notice Strip -->
+  <div style="background: rgba(212, 175, 55, 0.08); border: 1px dashed rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 0.65rem 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; font-size: 0.85rem;">
+    <div style="color: #ffffff; display: flex; align-items: center; gap: 0.6rem;">
+      <svg class="icon icon-sm" style="color: var(--gold-accent); flex-shrink: 0;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-floodlight"></use></svg>
+      <span><strong style="color: var(--gold-accent);">Notice for Slot Prices:</strong> {{ CLEANING_LIGHTING_NOTICE }}</span>
+    </div>
+    <span class="badge badge-turf font-mono" style="font-size: 0.72rem; letter-spacing: 0.04em;">Daylight vs High-Lux Night Rates</span>
+  </div>
+
+  <!-- 4. Interactive Slots Grid -->
+  <div class="slots-grid" id="slotsGrid">
+    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+      Loading timetable slots...
+    </div>
+  </div>
+
+  <!-- 5. Floating / Sticky Match Summary Bar -->
+  <div class="booking-summary-bar" id="bookingSummaryBar" style="display: none;">
+    <div>
+      <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Selected Slot Range (12-Hour):</div>
+      <div style="font-size: 1.35rem; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span id="summaryStartTime">--:--</span> to <span id="summaryEndTime">--:--</span>
+        <span class="badge badge-turf" id="summaryPeriod">Day</span>
+        <span class="badge badge-flame font-mono" id="summaryDuration">0 hrs</span>
+      </div>
+    </div>
+
+    <div style="text-align: right;">
+      <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Estimated Tariff:</div>
+      <div style="font-size: 1.6rem; font-weight: 900; color: var(--turf-green-bright); font-family: var(--font-mono);">
+        ₹<span id="summaryTotalPrice">0</span>
+      </div>
+      <div style="font-size: 0.75rem; color: var(--text-dim);" id="summaryFloodlightNote"></div>
+    </div>
+
+    <div>
+      <button class="btn btn-primary btn-lg" id="btnLockSlot">
+        <svg class="icon icon-md"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
+        Lock Slot & Checkout (10m Hold)
+      </button>
+    </div>
+  </div>
+
+  <!-- Promotional Offers - Coming Soon Banner -->
+  <div style="margin-top: 3.5rem;">
+    <div class="card card-stadium-glow" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%); border: 1.5px solid rgba(249, 115, 22, 0.35); border-radius: 1rem; padding: 2rem 2.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+      <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(249, 115, 22, 0.15); border: 2px solid var(--flame-orange); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);">
+          <svg class="icon icon-lg text-flame"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-tag"></use></svg>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
+            <span class="badge badge-flame" style="font-size: 0.75rem; letter-spacing: 0.05em; font-weight: 800; padding: 0.25rem 0.65rem;">
+              SPECIAL PROMOTIONS
+            </span>
+            <span class="badge badge-outline" style="border-color: var(--gold-accent); color: var(--gold-accent); font-size: 0.75rem;">
+              COMING SOON
+            </span>
+          </div>
+          <h3 style="font-size: 1.5rem; color: #ffffff; margin: 0 0 0.35rem; font-weight: 800;">
+            Exciting Booking Offers Coming Soon!
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0; max-width: 620px; line-height: 1.5;">
+            We are curating exclusive team discount passes, weekend tournament rewards, and night floodlight specials for Shuklaganj players. Join our WhatsApp community to be the first to grab flash deals when they drop.
+          </p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+        <a href="{{ WHATSAPP_COMMUNITY_URL }}" target="_blank" class="btn btn-outline btn-md" style="border-color: var(--turf-green-light); color: #ffffff;">
+          <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
+          Get Alerts on WhatsApp
+        </a>
+        <a href="tel:{{ HELPLINE_PRIMARY }}" class="btn btn-primary btn-md">
+          <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-phone"></use></svg>
+          Enquire Team Rates
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  let activeSportId = 1;
+  let activeSportName = "Box Cricket";
+  let activeDate = "{{ date_pills[0].date_str }}";
+  let slotDataList = [];
+  let selectedStartIndex = -1;
+  let selectedEndIndex = -1;
+
+  const slotsGrid = document.getElementById("slotsGrid");
+  const summaryBar = document.getElementById("bookingSummaryBar");
+  const summaryStartTime = document.getElementById("summaryStartTime");
+  const summaryEndTime = document.getElementById("summaryEndTime");
+  const summaryDuration = document.getElementById("summaryDuration");
+  const summaryTotalPrice = document.getElementById("summaryTotalPrice");
+  const summaryFloodlightNote = document.getElementById("summaryFloodlightNote");
+  const btnLockSlot = document.getElementById("btnLockSlot");
+
+  // Sport selection
+  document.querySelectorAll(".sport-tab").forEach(tab => {
+    tab.addEventListener("click", function() {
+      document.querySelectorAll(".sport-tab").forEach(t => t.classList.remove("active"));
+      this.classList.add("active");
+      activeSportId = parseInt(this.getAttribute("data-sport-id"));
+      activeSportName = this.querySelector("span").textContent;
+      document.getElementById("currentSportLabel").textContent = activeSportName;
+      resetSelection();
+      loadSlots();
+    });
+  });
+
+  // Date selection
+  document.querySelectorAll(".date-pill").forEach(pill => {
+    pill.addEventListener("click", function() {
+      document.querySelectorAll(".date-pill").forEach(p => p.classList.remove("active"));
+      this.classList.add("active");
+      activeDate = this.getAttribute("data-date");
+      document.getElementById("currentDateLabel").textContent = activeDate;
+      resetSelection();
+      loadSlots();
+    });
+  });
+
+  function resetSelection() {
+    selectedStartIndex = -1;
+    selectedEndIndex = -1;
+    summaryBar.style.display = "none";
+  }
+
+  function loadSlots() {
+    slotsGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">Refreshing slot availability...</div>';
+
+    fetch("/api/check-slots", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sport_id: activeSportId, date: activeDate })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        slotDataList = res.slots;
+        renderSlotsGrid();
+      } else {
+        slotsGrid.innerHTML = '<div style="grid-column: 1 / -1; color: #f87171; text-align: center;">Failed to load timetable.</div>';
+      }
+    })
+    .catch(() => {
+      slotsGrid.innerHTML = '<div style="grid-column: 1 / -1; color: #f87171; text-align: center;">Error loading slots.</div>';
+    });
+  }
+
+  let activePeriodFilter = "all";
+
+  // Period filter button handlers
+  document.querySelectorAll(".period-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
+      this.classList.add("active");
+      activePeriodFilter = this.getAttribute("data-period");
+      filterSlotsDisplay();
+    });
+  });
+
+  function filterSlotsDisplay() {
+    const cards = slotsGrid.querySelectorAll(".slot-card");
+    cards.forEach((card, idx) => {
+      const slot = slotDataList[idx];
+      if (!slot) return;
+      if (activePeriodFilter === "all" || slot.period === activePeriodFilter) {
+        card.style.display = "flex";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  function renderSlotsGrid() {
+    slotsGrid.innerHTML = "";
+    slotDataList.forEach((slot, index) => {
+      const card = document.createElement("div");
+      card.className = `slot-card status-${slot.status}`;
+      card.setAttribute("data-index", index);
+      card.setAttribute("data-period", slot.period);
+
+      let statusBadge = "";
+      if (slot.status === "available") {
+        statusBadge = '<span class="slot-status-label" style="color: var(--turf-green-bright);">🟢 Available</span>';
+      } else if (slot.status === "held") {
+        statusBadge = '<span class="slot-status-label" style="color: var(--flame-orange);">🟡 In Checkout</span>';
+      } else {
+        statusBadge = '<span class="slot-status-label" style="color: #f87171;">🔴 Booked</span>';
+      }
+
+      const periodClasses = {
+        "Morning": "period-morning",
+        "Noon": "period-noon",
+        "Evening": "period-evening",
+        "Night": "period-night"
+      };
+      const pClass = periodClasses[slot.period] || "period-morning";
+
+      card.innerHTML = `
+        <span class="slot-period-tag ${pClass}">${slot.period}</span>
+        <div class="slot-time-12h font-mono">${slot.start_time_12h}</div>
+        <div class="slot-time-sub font-mono">to ${slot.end_time_12h}</div>
+        <div class="slot-price font-mono">₹${slot.price}</div>
+        ${statusBadge}
+        ${slot.has_floodlight ? '<div class="slot-floodlight-tag">Night Floodlight</div>' : ''}
+      `;
+
+      if (slot.status === "available") {
+        card.addEventListener("click", () => handleSlotClick(index));
+      }
+
+      slotsGrid.appendChild(card);
+    });
+    updateCardSelectionVisuals();
+    filterSlotsDisplay();
+  }
+
+  function handleSlotClick(index) {
+    if (selectedStartIndex === -1) {
+      selectedStartIndex = index;
+      selectedEndIndex = index;
+    } else if (selectedStartIndex !== -1 && selectedEndIndex === selectedStartIndex) {
+      if (index < selectedStartIndex) {
+        selectedStartIndex = index;
+      } else {
+        let hasConflict = false;
+        for (let i = selectedStartIndex; i <= index; i++) {
+          if (slotDataList[i].status !== "available") {
+            hasConflict = true;
+            break;
+          }
+        }
+        if (hasConflict) {
+          alert("Cannot select across already booked or held slots. Please select continuous available slots.");
+          selectedStartIndex = index;
+          selectedEndIndex = index;
+        } else {
+          selectedEndIndex = index;
+        }
+      }
+    } else {
+      selectedStartIndex = index;
+      selectedEndIndex = index;
+    }
+
+    updateCardSelectionVisuals();
+    updateSummaryBar();
+  }
+
+  function updateCardSelectionVisuals() {
+    const cards = slotsGrid.querySelectorAll(".slot-card");
+    cards.forEach((card, idx) => {
+      if (selectedStartIndex !== -1 && idx >= selectedStartIndex && idx <= selectedEndIndex) {
+        card.classList.add("selected");
+      } else {
+        card.classList.remove("selected");
+      }
+    });
+  }
+
+  function updateSummaryBar() {
+    if (selectedStartIndex === -1) {
+      summaryBar.style.display = "none";
+      return;
+    }
+
+    const startSlot = slotDataList[selectedStartIndex];
+    const endSlot = slotDataList[selectedEndIndex];
+    summaryStartTime.textContent = startSlot.start_time_12h;
+    summaryEndTime.textContent = endSlot.end_time_12h;
+    const periodDisplay = startSlot.period === endSlot.period ? startSlot.period : `${startSlot.period} - ${endSlot.period}`;
+    document.getElementById("summaryPeriod").textContent = periodDisplay;
+
+    const slotsCount = (selectedEndIndex - selectedStartIndex) + 1;
+    const hours = slotsCount * 0.5;
+    summaryDuration.textContent = `${hours} hrs`;
+
+    let total = 0;
+    let hasFloodlight = false;
+    for (let i = selectedStartIndex; i <= selectedEndIndex; i++) {
+      total += slotDataList[i].price;
+      if (slotDataList[i].has_floodlight) hasFloodlight = true;
+    }
+
+    summaryTotalPrice.textContent = Math.round(total);
+    summaryFloodlightNote.textContent = hasFloodlight ? "Includes night floodlight illumination & cleaning maintenance" : "Standard daytime rate (electricity & cleaning included)";
+
+    summaryBar.style.display = "flex";
+  }
+
+  btnLockSlot.addEventListener("click", function() {
+    if (selectedStartIndex === -1) return;
+
+    const startSlot = slotDataList[selectedStartIndex];
+    const endSlot = slotDataList[selectedEndIndex];
+
+    btnLockSlot.disabled = true;
+    btnLockSlot.textContent = "Locking 10m Hold...";
+
+    fetch("/api/hold-slot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sport_id: activeSportId,
+        date: activeDate,
+        start_time: startSlot.start_time,
+        end_time: endSlot.end_time
+      })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        window.location.href = `/book?hold_token=${res.hold_token}`;
+      } else {
+        alert(res.message || "Failed to lock slot. It may have just been taken.");
+        btnLockSlot.disabled = false;
+        btnLockSlot.textContent = "Lock Slot & Checkout (10m Hold)";
+        loadSlots();
+      }
+    })
+    .catch(() => {
+      alert("Network error while holding slot. Please try again.");
+      btnLockSlot.disabled = false;
+      btnLockSlot.textContent = "Lock Slot & Checkout (10m Hold)";
+    });
+  });
+
+  // Check URL params for preselected sport
+  const urlParams = new URLSearchParams(window.location.search);
+  const sportParam = urlParams.get('sport');
+  if (sportParam) {
+    const matchingTab = document.querySelector(`.sport-tab[data-sport-slug="${sportParam}"]`);
+    if (matchingTab) {
+      document.querySelectorAll(".sport-tab").forEach(t => t.classList.remove("active"));
+      matchingTab.classList.add("active");
+      activeSportId = parseInt(matchingTab.getAttribute("data-sport-id"));
+      activeSportName = matchingTab.querySelector("span").textContent;
+      document.getElementById("currentSportLabel").textContent = activeSportName;
+    }
+  }
+
+  loadSlots();
+});
+</script>
+{% endblock %}
