@@ -435,6 +435,14 @@
       </div>
     </div>
 
+    <!-- CUSTOMER SEARCH / FILTER BAR -->
+    <div style="margin-bottom: 1.25rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+      <div style="position: relative; flex: 1; max-width: 460px;">
+        <input type="text" id="adminCustomerSearch" onkeyup="filterAdminCustomers()" placeholder="Search by Player Name, Mobile (+91), or Email..." class="form-control" style="font-size: 0.88rem;">
+      </div>
+      <span id="customerSearchCount" style="font-size: 0.85rem; color: var(--text-dim);">Showing all {{ registered_customers|length }} registered players</span>
+    </div>
+
     {% if registered_customers %}
     <div class="data-table-wrap">
       <table class="data-table">
@@ -450,9 +458,9 @@
             <th>Direct Action</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="customersTableBody">
           {% for c in registered_customers %}
-          <tr>
+          <tr class="customer-table-row" data-name="{{ c.name|lower }}" data-phone="{{ c.phone }}" data-email="{{ (c.email or '')|lower }}">
             <td class="font-mono" style="color: var(--turf-green-light); font-weight: 700;">#PL-{{ c.id }}</td>
             <td>
               <div style="font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 0.45rem;">
@@ -485,10 +493,15 @@
               {{ c.created_at[:10] if c.created_at else 'Active' }}
             </td>
             <td>
-              <a href="https://wa.me/91{{ c.phone }}" target="_blank" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; color: var(--turf-green-bright); border-color: rgba(16, 185, 129, 0.4);">
-                <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
-                WhatsApp
-              </a>
+              <div style="display: flex; gap: 0.4rem; align-items: center;">
+                <a href="https://wa.me/91{{ c.phone }}" target="_blank" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; color: var(--turf-green-bright); border-color: rgba(16, 185, 129, 0.4);">
+                  <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
+                  WhatsApp
+                </a>
+                <a href="tel:+91{{ c.phone }}" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; color: var(--text-muted);">
+                  Call
+                </a>
+              </div>
             </td>
           </tr>
           {% endfor %}
@@ -828,6 +841,26 @@ function submitCanteenMulti() {
     alert("Network error updating match bill: " + err);
     if (btnSubmit) btnSubmit.disabled = false;
   });
+}
+
+function filterAdminCustomers() {
+  const q = (document.getElementById('adminCustomerSearch').value || '').toLowerCase().trim();
+  let count = 0;
+  document.querySelectorAll('.customer-table-row').forEach(row => {
+    const name = row.dataset.name || '';
+    const phone = row.dataset.phone || '';
+    const email = row.dataset.email || '';
+    if (!q || name.includes(q) || phone.includes(q) || email.includes(q)) {
+      row.style.display = '';
+      count++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  const counter = document.getElementById('customerSearchCount');
+  if (counter) {
+    counter.textContent = q ? `Found ${count} matching player${count === 1 ? '' : 's'}` : `Showing all ${count} registered players`;
+  }
 }
 </script>
 {% endblock %}

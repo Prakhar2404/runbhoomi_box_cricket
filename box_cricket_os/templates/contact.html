@@ -143,10 +143,14 @@
               <div style="font-size: 0.88rem; color: var(--turf-green-light); font-weight: 700; margin-bottom: 0.5rem;">
                 {{ LEGAL_ENTITY }}
               </div>
-              <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+              <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">
                 <strong>Official Turf:</strong> {{ TURF_ADDRESS }}<br>
-                <strong>Direct UPI:</strong> <code>{{ UPI_ID }}</code> ({{ UPI_PAYEE_NAME }})
+                <strong>Payment Mode:</strong> Instant Dynamic QR at Checkout ({{ UPI_PAYEE_NAME }})
               </div>
+              <a href="{{ GOOGLE_MAPS_URL }}" target="_blank" class="btn btn-primary btn-sm">
+                <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-map-pin"></use></svg>
+                Locate Us on Google Maps ↗
+              </a>
             </div>
           </div>
         </div>

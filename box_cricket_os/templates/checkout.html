@@ -111,32 +111,29 @@
           </div>
 
           <!-- DYNAMIC UPI QR CODE SECTION -->
-          <div style="margin: 2rem 0; padding: 1.75rem; background: #070b12; border: 1px solid var(--border-turf); border-radius: 1rem; text-align: center;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <div style="margin: 2rem 0; padding: 1.75rem; background: var(--pitch-ground); border: 1px solid var(--crease-border-strong); border-radius: 12px; text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.4rem;">
               <svg class="icon icon-md text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-rupee"></use></svg>
-              <h4 style="font-size: 1.2rem; color: #ffffff;">Zero-Gateway Direct UPI Payment</h4>
+              <h4 style="font-size: 1.15rem; color: #ffffff; font-weight: 700;">Dynamic Matchday Payment QR</h4>
             </div>
-            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-              Scan with PhonePe, Google Pay, Paytm, or BHIM. Zero convenience fees.
+            <p style="font-size: 0.84rem; color: var(--chalk-dim); margin-bottom: 1.25rem;">
+              Scan directly with any UPI app (PhonePe, Google Pay, Paytm, Cred, BHIM).
             </p>
 
-            <!-- QR Container -->
-            <div class="upi-qr-box" id="qrContainer" style="width: 220px; height: 220px; margin: 0 auto 1.25rem; display: flex; align-items: center; justify-content: center;">
+            <!-- Dynamic QR Container -->
+            <div class="upi-qr-box" id="qrContainer" style="width: 210px; height: 210px; margin: 0 auto 1.25rem; display: flex; align-items: center; justify-content: center; background: #ffffff; padding: 12px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);">
               <div id="qrSvgWrapper" style="width: 100%; height: 100%;">
                 {{ qr_svg_50|safe }}
               </div>
             </div>
 
-            <!-- UPI ID & Payee -->
-            <div style="margin-bottom: 1rem;">
-              <div class="upi-id-pill">
-                <span>{{ UPI_ID }}</span>
-                <button type="button" onclick="copyUPI()" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.72rem;">
-                  Copy
-                </button>
+            <!-- Verified Payee & Amount Display -->
+            <div style="margin-bottom: 1.25rem;">
+              <div style="font-size: 0.85rem; color: var(--chalk-white); font-weight: 600;">
+                Verified Merchant: <strong style="color: var(--turf-grass-light);">{{ UPI_PAYEE_NAME }}</strong>
               </div>
-              <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.35rem;">
-                Verified Payee Name: <strong>{{ UPI_PAYEE_NAME }}</strong>
+              <div style="font-size: 0.78rem; color: var(--chalk-dim); margin-top: 0.25rem;">
+                Amount automatically embedded in QR: <strong>₹<span id="qrEmbeddedAmount">{{ advance_50|int }}</span></strong>
               </div>
             </div>
 
@@ -144,11 +141,11 @@
             <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
               <button type="button" onclick="downloadQRCode()" class="btn btn-outline btn-sm">
                 <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-download"></use></svg>
-                Download QR Code
+                Save QR Code
               </button>
               <a id="upiIntentLink" href="{{ upi_url_50 }}" class="btn btn-primary btn-sm">
                 <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-phone"></use></svg>
-                Open UPI App (Mobile)
+                Open UPI App on Mobile
               </a>
             </div>
           </div>
@@ -312,20 +309,26 @@ function updatePayableDisplays() {
   document.getElementById("displayFullAmount").textContent = Math.round(netTotal);
   document.getElementById("finalPayableNow").textContent = payableNow;
   document.getElementById("finalBalanceDue").textContent = balanceDue;
+  document.getElementById("qrEmbeddedAmount").textContent = payableNow;
 
-  // Refresh QR SVG dynamically
+  // Fetch updated dynamic QR SVG for this exact payable amount
   const bookingRef = "{{ temp_ref }}";
-  const upiId = "{{ UPI_ID }}";
-  const payeeName = "{{ UPI_PAYEE_NAME }}";
-  const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${payableNow.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Booking ' + bookingRef)}`;
-  document.getElementById("upiIntentLink").href = upiUrl;
+  fetch("/api/generate-qr", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount: payableNow, booking_ref: bookingRef })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success && res.qr_svg) {
+      document.getElementById("qrSvgWrapper").innerHTML = res.qr_svg;
+      document.getElementById("upiIntentLink").href = res.upi_url;
+    }
+  })
+  .catch(() => {});
 }
 
-// Copy UPI ID
-function copyUPI() {
-  navigator.clipboard.writeText("{{ UPI_ID }}");
-  alert("UPI ID '{{ UPI_ID }}' copied to clipboard!");
-}
+
 
 // Download QR Helper
 function downloadQRCode() {

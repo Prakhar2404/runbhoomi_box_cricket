@@ -22,9 +22,13 @@
           <svg class="icon icon-md"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
           Book Now / Reserve Slot
         </a>
-        <a href="{{ url_for('contact_page') }}" class="btn btn-outline btn-lg" style="padding: 0.9rem 1.6rem;">
+        <a href="{{ GOOGLE_MAPS_URL }}" target="_blank" class="btn btn-outline btn-lg" style="padding: 0.9rem 1.6rem; border-color: var(--turf-grass-border); color: var(--turf-grass-light);">
+          <svg class="icon icon-md text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-map-pin"></use></svg>
+          Locate Us
+        </a>
+        <a href="{{ url_for('contact_page') }}" class="btn btn-outline btn-lg" style="padding: 0.9rem 1.4rem;">
           <svg class="icon icon-md"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-phone"></use></svg>
-          Turf Helplines
+          Helplines
         </a>
       </div>
 

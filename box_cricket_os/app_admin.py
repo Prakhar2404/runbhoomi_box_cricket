@@ -15,7 +15,7 @@ from flask import (
     url_for, session, send_from_directory, flash
 )
 from .config import (
-    BRAND_NAME, LEGAL_ENTITY, BUSINESS_OWNER, TURF_ADDRESS,
+    BRAND_NAME, LEGAL_ENTITY, BUSINESS_OWNER, TURF_ADDRESS, GOOGLE_MAPS_URL,
     UPI_ID, UPI_PAYEE_NAME, ADMIN_MOBILE, ADMIN_EMAIL, ADMIN_DEFAULT_PASSWORD,
     HELPLINE_PRIMARY, HELPLINE_OPERATIONS, HELPLINE_TOURNAMENTS,
     SUPPORT_EMAIL, AVAILABILITY_TIMING, WHATSAPP_COMMUNITY_URL,
@@ -46,6 +46,7 @@ def inject_brand_context():
         "LEGAL_ENTITY": LEGAL_ENTITY,
         "BUSINESS_OWNER": BUSINESS_OWNER,
         "TURF_ADDRESS": TURF_ADDRESS,
+        "GOOGLE_MAPS_URL": GOOGLE_MAPS_URL,
         "UPI_ID": UPI_ID,
         "UPI_PAYEE_NAME": UPI_PAYEE_NAME,
         "HELPLINE_PRIMARY": HELPLINE_PRIMARY,
@@ -182,6 +183,30 @@ def admin_dashboard():
     """)
     confirmed_bookings = cursor.fetchall()
 
+    cursor.execute("""
+        SELECT b.*, u.name as customer_name, u.phone as customer_phone, u.age, u.gender,
+               s.name as sport_name
+        FROM bookings b
+        JOIN users u ON b.user_id = u.id
+        JOIN sports s ON b.sport_id = s.id
+        WHERE b.booking_status = 'cancelled'
+        ORDER BY b.booking_date DESC, b.start_time DESC
+        LIMIT 50
+    """)
+    cancelled_bookings = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT u.id, u.name, u.phone, u.email, u.age, u.gender, u.role, u.avatar_url, u.created_at,
+               COUNT(b.id) as booking_count,
+               COALESCE(SUM(CASE WHEN b.booking_status IN ('confirmed', 'completed') THEN b.total_amount ELSE 0 END), 0) as total_spent
+        FROM users u
+        LEFT JOIN bookings b ON u.id = b.user_id
+        WHERE u.role = 'customer'
+        GROUP BY u.id
+        ORDER BY u.created_at DESC
+    """)
+    registered_customers = cursor.fetchall()
+
     cursor.execute("SELECT * FROM partners ORDER BY created_at DESC")
     partners = cursor.fetchall()
 
@@ -205,6 +230,8 @@ def admin_dashboard():
         "admin_dashboard.html",
         in_process_bookings=in_process_bookings,
         confirmed_bookings=confirmed_bookings,
+        cancelled_bookings=cancelled_bookings,
+        registered_customers=registered_customers,
         partners=partners,
         sports=sports,
         pricing_rules=pricing_rules,
@@ -575,6 +602,44 @@ def add_canteen_to_bill(booking_id):
         "success": True, "message": f"Concessions added to bill. Total: ₹{new_total}, Due: ₹{new_bal}",
         "new_total": new_total, "new_balance": new_bal
     })
+
+# -------------------------------------------------------------
+# CUSTOMER DIRECTORY & PLAYER LOOKUP API
+# -------------------------------------------------------------
+
+@admin_app.route("/admin/api/customer-lookup")
+@admin_app.route("/api/admin/customer-lookup")
+def api_customer_lookup():
+    if not is_admin_or_partner():
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    q = (request.args.get("q") or "").strip()
+    conn = get_db()
+    cursor = conn.cursor()
+    if q:
+        cursor.execute("""
+            SELECT u.id, u.name, u.phone, u.email, u.age, u.gender, u.created_at,
+                   COUNT(b.id) as booking_count,
+                   COALESCE(SUM(CASE WHEN b.booking_status IN ('confirmed', 'completed') THEN b.total_amount ELSE 0 END), 0) as total_spent
+            FROM users u
+            LEFT JOIN bookings b ON u.id = b.user_id
+            WHERE u.role = 'customer' AND (u.phone LIKE ? OR u.name LIKE ? OR u.email LIKE ?)
+            GROUP BY u.id
+            ORDER BY u.created_at DESC
+        """, (f"%{q}%", f"%{q}%", f"%{q}%"))
+    else:
+        cursor.execute("""
+            SELECT u.id, u.name, u.phone, u.email, u.age, u.gender, u.created_at,
+                   COUNT(b.id) as booking_count,
+                   COALESCE(SUM(CASE WHEN b.booking_status IN ('confirmed', 'completed') THEN b.total_amount ELSE 0 END), 0) as total_spent
+            FROM users u
+            LEFT JOIN bookings b ON u.id = b.user_id
+            WHERE u.role = 'customer'
+            GROUP BY u.id
+            ORDER BY u.created_at DESC
+        """)
+    results = [dict(r) for r in cursor.fetchall()]
+    conn.close()
+    return jsonify({"success": True, "customers": results, "count": len(results)})
 
 # -------------------------------------------------------------
 # PARTNER MANAGEMENT & PRICING

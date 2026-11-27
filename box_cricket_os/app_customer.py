@@ -13,7 +13,7 @@ from flask import (
     url_for, session, send_from_directory, flash
 )
 from .config import (
-    BRAND_NAME, LEGAL_ENTITY, BUSINESS_OWNER, TURF_ADDRESS,
+    BRAND_NAME, LEGAL_ENTITY, BUSINESS_OWNER, TURF_ADDRESS, GOOGLE_MAPS_URL,
     UPI_ID, UPI_PAYEE_NAME, ADMIN_MOBILE, ADMIN_EMAIL,
     HELPLINE_PRIMARY, HELPLINE_OPERATIONS, HELPLINE_TOURNAMENTS,
     SUPPORT_EMAIL, AVAILABILITY_TIMING, WHATSAPP_COMMUNITY_URL,
@@ -48,6 +48,7 @@ def inject_brand_context():
         "LEGAL_ENTITY": LEGAL_ENTITY,
         "BUSINESS_OWNER": BUSINESS_OWNER,
         "TURF_ADDRESS": TURF_ADDRESS,
+        "GOOGLE_MAPS_URL": GOOGLE_MAPS_URL,
         "UPI_ID": UPI_ID,
         "UPI_PAYEE_NAME": UPI_PAYEE_NAME,
         "HELPLINE_PRIMARY": HELPLINE_PRIMARY,
@@ -466,6 +467,21 @@ def checkout_page():
         floodlight=floodlight, advance_50=advance_50, upi_url_50=upi_url_50,
         upi_url_100=upi_url_100, qr_svg_50=qr_svg_50, qr_svg_100=qr_svg_100, saved_user=saved_user
     )
+
+@customer_app.route("/api/generate-qr", methods=["POST"])
+def get_dynamic_qr():
+    data = request.get_json() or {}
+    amount = float(data.get("amount", 0))
+    booking_ref = data.get("booking_ref", "RB-MATCH")
+    note = f"Booking {booking_ref} Runbhoomi"
+    upi_url = generate_upi_intent_url(UPI_ID, UPI_PAYEE_NAME, amount, booking_ref, note)
+    qr_svg = generate_qr_svg(upi_url)
+    return jsonify({
+        "success": True,
+        "qr_svg": qr_svg,
+        "upi_url": upi_url,
+        "amount": amount
+    })
 
 @customer_app.route("/api/apply-promo", methods=["POST"])
 def apply_promo():

@@ -4,6 +4,7 @@ Registered Corporate Entity: Runbhoomi Box Cricket Pvt. Ltd.
 """
 
 import os
+import urllib.parse
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "runbhoomi.db")
@@ -15,6 +16,7 @@ BRAND_NAME = "RUNBHOOMI BOX CRICKET"
 LEGAL_ENTITY = "Runbhoomi Box Cricket Pvt. Ltd."
 BUSINESS_OWNER = "ADITYA GOYAL"
 TURF_ADDRESS = "Rajdhani Marg, Shuklaganj, Unnao, Uttar Pradesh, India - 209681"
+GOOGLE_MAPS_URL = "https://maps.app.goo.gl/ztGyE68hSxDptPiM8"
 
 # Payment & UPI Details
 UPI_ID = "goyal2254-1@okaxis"

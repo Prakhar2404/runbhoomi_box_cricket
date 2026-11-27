@@ -88,6 +88,10 @@
           <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-phone"></use></svg>
           Help & Support
         </a></li>
+        <li><a href="{{ GOOGLE_MAPS_URL }}" target="_blank" class="nav-item" style="color: var(--turf-grass-light);">
+          <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-map-pin"></use></svg>
+          Locate Us
+        </a></li>
         <li><a href="{{ WHATSAPP_COMMUNITY_URL }}" target="_blank" class="nav-item">
           <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
           Community
@@ -126,95 +130,26 @@
   <!-- Global Footer -->
   <footer class="footer">
     <div class="container">
-      <!-- Universal Grand Founder & Turf Owner Banner (Present on Every Page) -->
-      <div class="founder-showcase-banner" style="background: var(--pitch-ground); border: 1px solid var(--crease-border-strong); border-left: 4px solid var(--turf-grass); border-radius: 12px; padding: 2rem 2.25rem; margin-bottom: 3.5rem; position: relative; overflow: hidden;">
-        <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 2.25rem; align-items: center;" class="founder-banner-grid">
-          <!-- Large Visible Poster Banner Photo -->
-          <div style="position: relative; flex-shrink: 0; text-align: center;">
-            <div style="position: relative; display: inline-block;">
-              <img src="{{ url_for('static', filename='img/owner_aditya_goyal.jpg') }}" alt="Aditya Goyal - Founder & Owner" style="width: 200px; height: 250px; border-radius: 8px; object-fit: cover; object-position: center top; border: 1px solid var(--crease-border-strong); display: block;">
-              <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); background: var(--turf-grass-deep); color: #ffffff; font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);">
-                TURF OWNER
+      <div class="footer-compact">
+        <!-- Brand & Leadership Summary -->
+        <div class="footer-col-main">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem;">
+            <img src="{{ url_for('static', filename='img/brand_logo_circle.png') }}" alt="Logo" style="width: 42px; height: 42px; border-radius: 8px; border: 1px solid var(--crease-border-strong);">
+            <div>
+              <div style="font-weight: 800; font-size: 1.15rem; color: #ffffff; letter-spacing: -0.02em;">RUNBHOOMI BOX CRICKET</div>
+              <div style="font-size: 0.72rem; color: var(--turf-grass-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                Owned & Directed by {{ BUSINESS_OWNER }}
               </div>
             </div>
           </div>
-
-          <!-- Owner Leadership Story & Details -->
-          <div>
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
-              <span class="badge badge-dim">
-                OFFICIAL VENUE LEADERSHIP
-              </span>
-              <span class="badge badge-turf">
-                FOUNDER & DIRECTOR
-              </span>
-              <span style="color: var(--chalk-dim); font-size: 0.84rem;">Runbhoomi Box Cricket Pvt. Ltd.</span>
-            </div>
-
-            <h2 style="font-size: 2rem; color: #ffffff; margin: 0 0 0.35rem; font-weight: 800; letter-spacing: -0.03em;">
-              ADITYA GOYAL
-            </h2>
-
-            <p style="color: var(--turf-grass-light); font-size: 0.98rem; font-weight: 600; margin-bottom: 0.65rem;">
-              "Building Shuklaganj's #1 destination for competitive night cricket and grassroots sports passion."
-            </p>
-
-            <p style="color: var(--chalk-dim); font-size: 0.88rem; line-height: 1.55; max-width: 650px; margin-bottom: 1.15rem;">
-              Engineered with championship-grade synthetic turf, high-lux floodlights, and professional tension netting. Personally inspected for zero-delay match handovers and matchday preparation.
-            </p>
-
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <span style="background: rgba(255,255,255,0.03); border: 1px solid var(--crease-border); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.78rem; color: #ffffff; display: inline-flex; align-items: center; gap: 0.4rem;">
-                <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
-                100% Owner Operated
-              </span>
-              <span style="background: rgba(255,255,255,0.03); border: 1px solid var(--crease-border); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.78rem; color: #ffffff; display: inline-flex; align-items: center; gap: 0.4rem;">
-                <svg class="icon icon-sm text-gold"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-trophy"></use></svg>
-                Corporate & League Desk
-              </span>
-              <span style="background: rgba(255,255,255,0.03); border: 1px solid var(--crease-border); padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.78rem; color: #ffffff; display: inline-flex; align-items: center; gap: 0.4rem;">
-                <svg class="icon icon-sm text-flame"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-map-pin"></use></svg>
-                Rajdhani Marg, Shuklaganj
-              </span>
-            </div>
-          </div>
-
-          <!-- Direct Owner Connection Actions -->
-          <div style="display: flex; flex-direction: column; gap: 0.65rem; min-width: 210px; justify-content: center;">
-            <a href="tel:8858908825" class="btn btn-primary btn-md">
-              <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-phone"></use></svg>
-              Call 88589 08825
-            </a>
-            <a href="https://wa.me/918858908825?text=Hello%20Aditya%20Goyal%20ji,%20inquiring%20about%20Runbhoomi%20Box%20Cricket" target="_blank" class="btn btn-outline btn-md">
-              <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
-              WhatsApp Aditya Goyal
-            </a>
-            {% if portal_type == 'customer' %}
-            <a href="{{ url_for('booking_page') }}" class="btn btn-flame btn-sm" style="justify-content: center;">
-              <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
-              Reserve Match Slot
-            </a>
-            {% else %}
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-flame btn-sm" style="justify-content: center;">
-              <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
-              Operations Cockpit
-            </a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-grid">
-        <!-- Brand Info -->
-        <div>
-          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-            <img src="{{ url_for('static', filename='img/brand_logo_circle.png') }}" alt="Logo" style="width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--gold-accent);">
-            <div style="font-weight: 900; font-size: 1.25rem;">RUNBHOOMI BOX CRICKET</div>
-          </div>
-          <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1rem; line-height: 1.6;">
-            Shuklaganj's premier multi-sport all-weather turf facility. Featuring high-traction synthetic grass, professional tension boundary netting, and stadium-grade high-lux LED illumination.
+          <p style="color: var(--chalk-dim); font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem; max-width: 420px;">
+            Shuklaganj's premier multi-sport turf arena with FIFA-grade synthetic grass, competition night floodlights, and professional tension boundary netting.
           </p>
-          <div style="display: flex; gap: 0.65rem;">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="tel:{{ HELPLINE_PRIMARY }}" class="btn btn-primary btn-sm">
+              <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-phone"></use></svg>
+              Call {{ HELPLINE_PRIMARY }}
+            </a>
             <a href="{{ WHATSAPP_COMMUNITY_URL }}" target="_blank" class="btn btn-outline btn-sm">
               <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
               WhatsApp Hub
@@ -226,48 +161,53 @@
           </div>
         </div>
 
-        <!-- Sports & Facilities -->
-        <div>
-          <h4 style="font-size: 0.95rem; margin-bottom: 1rem; color: #ffffff;">Sports Facilities</h4>
-          <ul style="list-style: none; font-size: 0.88rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.6rem;">
-            <li>Box Cricket (10-16 Players)</li>
-            <li>5v5 Football Arena</li>
+        <!-- Quick Venue Facilities -->
+        <div class="footer-col-nav">
+          <div class="footer-heading">Sports Arena</div>
+          <ul class="footer-nav-list">
+            <li>Box Cricket (10-16 P)</li>
+            <li>5v5 Football Turf</li>
             <li>Synthetic Badminton</li>
             <li>Pro Kabaddi Court</li>
             <li>All-Weather Volleyball</li>
           </ul>
         </div>
 
-        <!-- Quick Helplines -->
-        <div>
-          <h4 style="font-size: 0.95rem; margin-bottom: 1rem; color: #ffffff;">Calling Helplines</h4>
-          <ul style="list-style: none; font-size: 0.85rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.65rem;">
+        <!-- Direct Helplines -->
+        <div class="footer-col-nav">
+          <div class="footer-heading">Helpline Desk</div>
+          <ul class="footer-nav-list">
             <li>
-              <div style="color: #ffffff; font-weight: 700;">Primary WhatsApp & Call:</div>
-              <a href="tel:8858908825" style="color: var(--turf-green-light); text-decoration: none;">{{ HELPLINE_PRIMARY }}</a>
+              <span style="display: block; font-size: 0.72rem; color: var(--chalk-subtle); text-transform: uppercase;">Owner Direct:</span>
+              <a href="tel:8858908825" style="color: var(--chalk-white); text-decoration: none; font-weight: 700;">{{ HELPLINE_PRIMARY }}</a>
             </li>
             <li>
-              <div style="color: #ffffff; font-weight: 700;">Ground & Operations:</div>
-              <a href="tel:7007167223" style="color: var(--turf-green-light); text-decoration: none;">{{ HELPLINE_OPERATIONS }}</a>
+              <span style="display: block; font-size: 0.72rem; color: var(--chalk-subtle); text-transform: uppercase;">Ground Desk:</span>
+              <a href="tel:7007167223" style="color: var(--chalk-white); text-decoration: none; font-weight: 700;">{{ HELPLINE_OPERATIONS }}</a>
             </li>
             <li>
-              <div style="color: #ffffff; font-weight: 700;">Tournaments & Leagues:</div>
-              <a href="tel:6393552467" style="color: var(--turf-green-light); text-decoration: none;">{{ HELPLINE_TOURNAMENTS }}</a>
+              <span style="display: block; font-size: 0.72rem; color: var(--chalk-subtle); text-transform: uppercase;">Tournaments:</span>
+              <a href="tel:6393552467" style="color: var(--chalk-white); text-decoration: none; font-weight: 700;">{{ HELPLINE_TOURNAMENTS }}</a>
             </li>
           </ul>
         </div>
 
-        <!-- Legal & Location -->
-        <div>
-          <h4 style="font-size: 0.95rem; margin-bottom: 1rem; color: #ffffff;">Official Turf Venue</h4>
-          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">
-            <svg class="icon icon-sm text-turf" style="margin-right: 0.25rem;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-map-pin"></use></svg>
+        <!-- Venue Location & Corporate Entity -->
+        <div class="footer-col-legal">
+          <div class="footer-heading">Venue Location</div>
+          <p style="color: var(--chalk-dim); font-size: 0.82rem; margin-bottom: 0.65rem; line-height: 1.45;">
+            <svg class="icon icon-sm text-turf" style="margin-right: 0.2rem;"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-map-pin"></use></svg>
             {{ TURF_ADDRESS }}
           </p>
-          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-boundary); padding: 0.75rem; border-radius: 0.5rem; font-size: 0.8rem; color: var(--text-dim);">
-            <strong>Corporate Entity:</strong><br>
-            {{ LEGAL_ENTITY }}<br>
-            <strong>Registered Owner:</strong> {{ BUSINESS_OWNER }}
+          <div style="margin-bottom: 0.75rem;">
+            <a href="{{ GOOGLE_MAPS_URL }}" target="_blank" class="btn btn-outline btn-sm" style="width: 100%; border-color: var(--turf-grass-border); color: var(--turf-grass-light); padding: 0.35rem 0.65rem; font-size: 0.78rem;">
+              <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-map-pin"></use></svg>
+              Locate Us on Google Maps ↗
+            </a>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--crease-border); padding: 0.55rem 0.75rem; border-radius: 6px; font-size: 0.78rem; color: var(--chalk-dim);">
+            <strong>{{ LEGAL_ENTITY }}</strong><br>
+            Director: {{ BUSINESS_OWNER }}
           </div>
         </div>
       </div>
@@ -277,7 +217,7 @@
           &copy; 2026 <strong>{{ LEGAL_ENTITY }}</strong>. All rights reserved.
         </div>
         <div>
-          Support Hours: {{ AVAILABILITY_TIMING }} | Direct Support: <a href="mailto:{{ SUPPORT_EMAIL }}" style="color: var(--turf-green-light); text-decoration: none;">{{ SUPPORT_EMAIL }}</a>
+          Hours: {{ AVAILABILITY_TIMING }} | Email: <a href="mailto:{{ SUPPORT_EMAIL }}" style="color: var(--turf-grass-light); text-decoration: none;">{{ SUPPORT_EMAIL }}</a>
         </div>
       </div>
     </div>
