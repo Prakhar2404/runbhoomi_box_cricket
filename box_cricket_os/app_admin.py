@@ -416,6 +416,130 @@ def api_canteen_menu():
     return jsonify({"success": True, "items": items, "hygiene_notice": CANTEEN_HYGIENE_NOTICE})
 
 # -------------------------------------------------------------
+# CANTEEN INVENTORY & PRICING MANAGEMENT (ADMIN & PARTNERS)
+# -------------------------------------------------------------
+
+@admin_app.route("/admin/canteen/add", methods=["POST"])
+@admin_app.route("/canteen/add", methods=["POST"])
+def add_canteen_item():
+    if not is_admin_or_partner():
+        return jsonify({"success": False, "message": "Unauthorized: Admin or Partner login required."}), 403
+
+    payload = request.get_json(silent=True) or request.form
+    name = (payload.get("name") or "").strip()
+    category = (payload.get("category") or "snacks").strip().lower()
+    price_val = payload.get("price")
+    stock_val = payload.get("stock", 100)
+
+    if not name:
+        return jsonify({"success": False, "message": "Item name is required."}), 400
+
+    try:
+        price = float(price_val)
+        if price < 0:
+            return jsonify({"success": False, "message": "Price must be non-negative."}), 400
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "message": "Invalid price value."}), 400
+
+    try:
+        stock = int(stock_val) if stock_val is not None else 100
+    except (TypeError, ValueError):
+        stock = 100
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO canteen_items (name, category, price, stock, is_active)
+        VALUES (?, ?, ?, ?, 1)
+    """, (name, category, price, stock))
+    item_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": f"Added '{name}' at ₹{int(price)} to Canteen.",
+        "item": {"id": item_id, "name": name, "category": category, "price": price, "stock": stock}
+    })
+
+@admin_app.route("/admin/canteen/edit/<int:item_id>", methods=["POST"])
+@admin_app.route("/canteen/edit/<int:item_id>", methods=["POST"])
+def edit_canteen_item(item_id):
+    if not is_admin_or_partner():
+        return jsonify({"success": False, "message": "Unauthorized: Admin or Partner login required."}), 403
+
+    payload = request.get_json(silent=True) or request.form
+    name = (payload.get("name") or "").strip()
+    category = (payload.get("category") or "").strip().lower()
+    price_val = payload.get("price")
+    stock_val = payload.get("stock")
+
+    if not name:
+        return jsonify({"success": False, "message": "Item name is required."}), 400
+
+    try:
+        price = float(price_val)
+        if price < 0:
+            return jsonify({"success": False, "message": "Price must be non-negative."}), 400
+    except (TypeError, ValueError):
+        return jsonify({"success": False, "message": "Invalid price value."}), 400
+
+    try:
+        stock = int(stock_val) if stock_val is not None else 100
+    except (TypeError, ValueError):
+        stock = 100
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM canteen_items WHERE id = ?", (item_id,))
+    if not cursor.fetchone():
+        conn.close()
+        return jsonify({"success": False, "message": "Canteen item not found."}), 404
+
+    cursor.execute("""
+        UPDATE canteen_items
+        SET name = ?, category = ?, price = ?, stock = ?
+        WHERE id = ?
+    """, (name, category, price, stock, item_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": f"Updated '{name}' (₹{int(price)}).",
+        "item": {"id": item_id, "name": name, "category": category, "price": price, "stock": stock}
+    })
+
+@admin_app.route("/admin/canteen/delete/<int:item_id>", methods=["POST"])
+@admin_app.route("/canteen/delete/<int:item_id>", methods=["POST"])
+def delete_canteen_item(item_id):
+    if not is_admin_or_partner():
+        return jsonify({"success": False, "message": "Unauthorized: Admin or Partner login required."}), 403
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM canteen_items WHERE id = ?", (item_id,))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"success": False, "message": "Item not found."}), 404
+    item_name = row["name"]
+
+    cursor.execute("SELECT COUNT(*) FROM booking_canteen_orders WHERE item_id = ?", (item_id,))
+    has_orders = cursor.fetchone()[0] > 0
+
+    if has_orders:
+        cursor.execute("UPDATE canteen_items SET is_active = 0 WHERE id = ?", (item_id,))
+        msg = f"'{item_name}' removed from menu (archived for receipt history)."
+    else:
+        cursor.execute("DELETE FROM canteen_items WHERE id = ?", (item_id,))
+        msg = f"'{item_name}' removed from canteen menu."
+
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "message": msg})
+
+# -------------------------------------------------------------
 # MATCH OPERATIONS (CONFIRM, CANCEL, COLLECT, CANTEEN POS)
 # -------------------------------------------------------------
 

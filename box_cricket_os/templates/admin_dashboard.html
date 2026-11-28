@@ -27,10 +27,10 @@
       {% if admin_user.role == 'admin' %}
       <a href="{{ url_for('revenue_analytics') }}" class="btn btn-primary btn-sm">
         <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-trophy"></use></svg>
-        Revenue Intelligence
+        Revenue Analysis
       </a>
       {% else %}
-      <span class="badge badge-dim" style="padding: 0.45rem 0.75rem; border: 1px solid var(--border-crease); font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem;" title="Revenue Intelligence is restricted to Turf Owner">
+      <span class="badge badge-dim" style="padding: 0.45rem 0.75rem; border: 1px solid var(--border-crease); font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.35rem;" title="Revenue Analysis is restricted to Turf Owner">
         Revenue: Owner Only
       </span>
       {% endif %}
@@ -40,24 +40,6 @@
       </a>
       <a href="{{ url_for('admin_logout') }}" class="btn btn-outline btn-sm">Sign Out</a>
     </div>
-  </div>
-
-  <!-- Top Admin Section Switcher Tabs (Matches vs Revenue Page) -->
-  <div style="display: flex; gap: 0.75rem; margin-bottom: 1.75rem; border-bottom: 2px solid var(--border-boundary); padding-bottom: 1.25rem; flex-wrap: wrap; align-items: center;">
-    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-md" style="font-weight: 800; box-shadow: 0 0 15px var(--turf-green-glow);">
-      <svg class="icon icon-sm"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-calendar"></use></svg>
-      📋 Matches & Ground Operations (Active)
-    </a>
-    {% if admin_user.role == 'admin' %}
-    <a href="{{ url_for('revenue_analytics') }}" class="btn btn-outline btn-md" style="border-color: var(--gold-accent); color: var(--gold-accent); font-weight: 900;">
-      <svg class="icon icon-sm text-gold"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-trophy"></use></svg>
-      💰 Financial & Revenue Intelligence (New Page) →
-    </a>
-    {% endif %}
-    <a href="{{ url_for('canteen_page') }}" target="_blank" class="btn btn-outline btn-md" style="margin-left: auto;">
-      <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
-      Public Canteen Menu ↗
-    </a>
   </div>
 
   <!-- Command Center Tabs Navigation -->
@@ -82,7 +64,7 @@
     {% endif %}
     <button class="btn btn-outline btn-sm" onclick="switchTab('canteenTab', this)">
       <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
-      Canteen POS
+      Manage Canteen
     </button>
     <button class="btn btn-outline btn-sm" onclick="switchTab('customersTab', this)">
       <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-user"></use></svg>
@@ -356,14 +338,19 @@
   </div>
   {% endif %}
 
-  <!-- TAB 5: CANTEEN POS CATALOG -->
+  <!-- TAB 5: MANAGE CANTEEN MENU & PRICING -->
   <div id="canteenTab" class="tab-pane" style="display: none;">
     <div style="margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div>
-        <h3 style="font-size: 1.35rem;">In-House Canteen POS & Concession Inventory</h3>
-        <p style="font-size: 0.85rem; color: var(--text-dim);">Fresh kitchen food, egg dishes, Maggie, mocktails, chai, smokes, and gear rental.</p>
+        <h3 style="font-size: 1.35rem; color: #ffffff;">Manage Canteen Menu & Pricing</h3>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0.25rem 0 0;">
+          Admin & Partners can add new canteen products, alter existing prices & stocks, or remove items.
+        </p>
       </div>
-      <div>
+      <div style="display: flex; gap: 0.6rem; align-items: center;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="openAddCanteenModal()" style="font-weight: 800;">
+          + Add New Item
+        </button>
         <a href="{{ url_for('canteen_page') }}" target="_blank" class="btn btn-outline btn-sm">
           <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-drink"></use></svg>
           Customer Canteen View ↗
@@ -372,56 +359,81 @@
     </div>
 
     <!-- MANDATORY CANTEEN HYGIENE NOTICE -->
-    <div class="card" style="margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.08); border: 1px solid var(--border-turf); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.85rem;">
-      <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+    <div class="card" style="margin-bottom: 1.25rem; background: rgba(16, 185, 129, 0.08); border: 1px solid var(--border-turf); padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.85rem;">
+      <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
         <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-shield-check"></use></svg>
       </div>
       <div>
-        <strong style="color: var(--turf-green-light); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.04em;">Official Canteen Protocol</strong>
-        <p style="margin: 0; font-size: 0.88rem; color: #ffffff; font-weight: 600;">{{ CANTEEN_HYGIENE_NOTICE }}</p>
+        <strong style="color: var(--turf-green-light); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em;">Official Canteen Protocol</strong>
+        <p style="margin: 0; font-size: 0.85rem; color: #ffffff; font-weight: 600;">{{ CANTEEN_HYGIENE_NOTICE }}</p>
       </div>
     </div>
 
-    <!-- ADMIN CANTEEN SEARCH BAR -->
-    <div style="margin-bottom: 1.25rem;">
-      <input type="text" id="adminCanteenSearch" onkeyup="filterAdminCanteen()" placeholder="Filter canteen products..." class="form-control" style="max-width: 400px; font-size: 0.88rem;">
+    <!-- CATEGORY FILTER PILLS & SEARCH -->
+    <div style="margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+        <div style="position: relative; flex: 1; max-width: 420px;">
+          <input type="text" id="adminCanteenSearch" onkeyup="filterManageCanteen()" placeholder="Search canteen items by name..." class="form-control" style="font-size: 0.88rem;">
+        </div>
+        <span id="manageCanteenCount" style="font-size: 0.85rem; color: var(--text-dim);">Showing all {{ canteen_items|length }} items</span>
+      </div>
+
+      <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.25rem;" id="manageCanteenCategoryPills">
+        <button type="button" class="btn btn-sm btn-primary canteen-cat-pill active" onclick="filterManageCanteenCat('all', this)" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">All Categories</button>
+        <button type="button" class="btn btn-sm btn-outline canteen-cat-pill" onclick="filterManageCanteenCat('snacks', this)" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">Maggi & Snacks</button>
+        <button type="button" class="btn btn-sm btn-outline canteen-cat-pill" onclick="filterManageCanteenCat('beverages', this)" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">Cold Drinks & Tea</button>
+        <button type="button" class="btn btn-sm btn-outline canteen-cat-pill" onclick="filterManageCanteenCat('eggs', this)" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">Eggs & Kitchen</button>
+        <button type="button" class="btn btn-sm btn-outline canteen-cat-pill" onclick="filterManageCanteenCat('mocktails', this)" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">Mocktails</button>
+        <button type="button" class="btn btn-sm btn-outline canteen-cat-pill" onclick="filterManageCanteenCat('energy_sports', this)" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">Sports Energy & Balls</button>
+        <button type="button" class="btn btn-sm btn-outline canteen-cat-pill" onclick="filterManageCanteenCat('smokes', this)" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">Smokes & Lounge</button>
+        <button type="button" class="btn btn-sm btn-outline canteen-cat-pill" onclick="filterManageCanteenCat('gear_rental', this)" style="font-size: 0.75rem; padding: 0.25rem 0.65rem;">Gear Rental</button>
+      </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;" id="adminCanteenGrid">
-      {% for item in canteen_items %}
-      <div class="card admin-canteen-card" data-name="{{ item.name|lower }}" data-cat="{{ item.category|lower }}" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <span class="badge badge-turf" style="font-size: 0.72rem;">{{ item.category.replace('_', ' ').upper() }}</span>
-            <span style="font-size: 0.8rem; color: var(--text-dim);">Stock: {{ item.stock }}</span>
-          </div>
-          <h4 style="font-size: 1.05rem; color: #ffffff; margin-bottom: 0.35rem;">{{ item.name }}</h4>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-boundary); padding-top: 0.75rem; margin-top: 1rem;">
-          <div class="font-mono" style="font-size: 1.35rem; font-weight: 900; color: var(--turf-green-light);">
-            ₹{{ item.price|int }}
-          </div>
-          <span style="font-size: 0.75rem; color: var(--text-dim);">ID #{{ item.id }}</span>
-        </div>
-      </div>
-      {% endfor %}
+    <!-- CANTEEN ITEMS TABLE -->
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Item Details</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="manageCanteenTableBody">
+          {% for item in canteen_items %}
+          <tr class="manage-canteen-row" data-id="{{ item.id }}" data-name="{{ item.name|lower }}" data-cat="{{ item.category|lower }}">
+            <td>
+              <div style="font-weight: 800; color: #ffffff; font-size: 0.95rem;">{{ item.name }}</div>
+              <div style="font-size: 0.75rem; color: var(--text-dim);">Product ID #{{ item.id }}</div>
+            </td>
+            <td>
+              <span class="badge badge-turf" style="font-size: 0.72rem;">{{ item.category.replace('_', ' ').upper() }}</span>
+            </td>
+            <td>
+              <span class="font-mono" style="font-size: 1.15rem; font-weight: 900; color: var(--turf-green-light);">₹{{ item.price|int }}</span>
+            </td>
+            <td>
+              <span style="font-size: 0.85rem; color: var(--text-muted);">{{ item.stock }} in stock</span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 0.4rem; align-items: center;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="openEditCanteenModal({{ item.id }}, '{{ item.name|replace("'", "\\'") }}', '{{ item.category }}', {{ item.price }}, {{ item.stock }})" style="padding: 0.25rem 0.65rem; font-size: 0.78rem;">
+                  Alter Price / Item
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="deleteCanteenItem({{ item.id }}, '{{ item.name|replace("'", "\\'") }}')" style="padding: 0.25rem 0.65rem; font-size: 0.78rem; color: #f87171; border-color: rgba(248, 113, 113, 0.4);">
+                  Remove
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
-
-  <script>
-  function filterAdminCanteen() {
-    const q = (document.getElementById('adminCanteenSearch').value || '').toLowerCase().trim();
-    document.querySelectorAll('.admin-canteen-card').forEach(c => {
-      const name = c.dataset.name || '';
-      const cat = c.dataset.cat || '';
-      if (!q || name.includes(q) || cat.includes(q)) {
-        c.style.display = 'flex';
-      } else {
-        c.style.display = 'none';
-      }
-    });
-  }
-  </script>
 
   <!-- TAB 6: REGISTERED CUSTOMER ACCOUNTS -->
   <div id="customersTab" class="tab-pane" style="display: none;">
@@ -458,8 +470,10 @@
             <th>Direct Action</th>
           </tr>
         </thead>
+        <tbody>
         <tbody id="customersTableBody">
           {% for c in registered_customers %}
+          <tr>
           <tr class="customer-table-row" data-name="{{ c.name|lower }}" data-phone="{{ c.phone }}" data-email="{{ (c.email or '')|lower }}">
             <td class="font-mono" style="color: var(--turf-green-light); font-weight: 700;">#PL-{{ c.id }}</td>
             <td>
@@ -493,6 +507,10 @@
               {{ c.created_at[:10] if c.created_at else 'Active' }}
             </td>
             <td>
+              <a href="https://wa.me/91{{ c.phone }}" target="_blank" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; color: var(--turf-green-bright); border-color: rgba(16, 185, 129, 0.4);">
+                <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
+                WhatsApp
+              </a>
               <div style="display: flex; gap: 0.4rem; align-items: center;">
                 <a href="https://wa.me/91{{ c.phone }}" target="_blank" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; color: var(--turf-green-bright); border-color: rgba(16, 185, 129, 0.4);">
                   <svg class="icon icon-sm text-turf"><use href="{{ url_for('static', filename='img/sports_icons.svg') }}#icon-whatsapp"></use></svg>
@@ -601,6 +619,107 @@
         </button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal: Add New Canteen Item -->
+<div class="modal-overlay" id="addCanteenItemModal" onclick="closeAddCanteenModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 520px; width: 95%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-crease); padding-bottom: 0.75rem;">
+      <h3 style="font-size: 1.35rem; color: #ffffff; margin: 0;">Add Canteen Item</h3>
+      <button type="button" onclick="closeAddCanteenModal()" class="btn btn-outline btn-sm">✕</button>
+    </div>
+
+    <form id="addCanteenForm" onsubmit="submitAddCanteenItem(event)">
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted);">Item / Product Name *</label>
+        <input type="text" id="addCanteenName" class="form-control" placeholder="e.g. Masala Omelette, Cold Coffee, Sting" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted);">Menu Category *</label>
+        <select id="addCanteenCategory" class="form-control" required style="background: var(--crease-surface); color: #ffffff;">
+          <option value="snacks">Maggi & Hot Snacks</option>
+          <option value="beverages">Cold Drinks, Water & Chai</option>
+          <option value="eggs">Fresh Eggs & Kitchen</option>
+          <option value="mocktails">Mocktails & Coolers</option>
+          <option value="energy_sports">Sports Hydration, Energy & Balls</option>
+          <option value="smokes">Smokes & Lounge</option>
+          <option value="gear_rental">Sports Gear & Rentals</option>
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted);">Price (₹) *</label>
+          <input type="number" id="addCanteenPrice" class="form-control font-mono" placeholder="e.g. 50" min="0" step="1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted);">Initial Stock (units)</label>
+          <input type="number" id="addCanteenStock" class="form-control font-mono" value="100" min="0" step="1">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="button" onclick="closeAddCanteenModal()" class="btn btn-outline btn-md" style="flex: 1;">Cancel</button>
+        <button type="submit" id="btnAddCanteenSubmit" class="btn btn-primary btn-md" style="flex: 2; font-weight: 900;">
+          Add to Canteen Menu
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Alter / Edit Canteen Item & Pricing -->
+<div class="modal-overlay" id="editCanteenItemModal" onclick="closeEditCanteenModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 520px; width: 95%;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-crease); padding-bottom: 0.75rem;">
+      <div>
+        <h3 style="font-size: 1.35rem; color: #ffffff; margin: 0;">Alter Item & Pricing</h3>
+        <span style="font-size: 0.8rem; color: var(--turf-green-light); font-weight: 700;" id="editCanteenIdDisplay"></span>
+      </div>
+      <button type="button" onclick="closeEditCanteenModal()" class="btn btn-outline btn-sm">✕</button>
+    </div>
+
+    <form id="editCanteenForm" onsubmit="submitEditCanteenItem(event)">
+      <input type="hidden" id="editCanteenId">
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted);">Item / Product Name *</label>
+        <input type="text" id="editCanteenName" class="form-control" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted);">Menu Category *</label>
+        <select id="editCanteenCategory" class="form-control" required style="background: var(--crease-surface); color: #ffffff;">
+          <option value="snacks">Maggi & Hot Snacks</option>
+          <option value="beverages">Cold Drinks, Water & Chai</option>
+          <option value="eggs">Fresh Eggs & Kitchen</option>
+          <option value="mocktails">Mocktails & Coolers</option>
+          <option value="energy_sports">Sports Hydration, Energy & Balls</option>
+          <option value="smokes">Smokes & Lounge</option>
+          <option value="gear_rental">Sports Gear & Rentals</option>
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted);">Price (₹) *</label>
+          <input type="number" id="editCanteenPrice" class="form-control font-mono" min="0" step="1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted);">Stock Available (units)</label>
+          <input type="number" id="editCanteenStock" class="form-control font-mono" min="0" step="1">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="button" onclick="closeEditCanteenModal()" class="btn btn-outline btn-md" style="flex: 1;">Cancel</button>
+        <button type="submit" id="btnEditCanteenSubmit" class="btn btn-primary btn-md" style="flex: 2; font-weight: 900;">
+          Save Alterations
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}
@@ -861,6 +980,168 @@ function filterAdminCustomers() {
   if (counter) {
     counter.textContent = q ? `Found ${count} matching player${count === 1 ? '' : 's'}` : `Showing all ${count} registered players`;
   }
+}
+
+// Manage Canteen Functions
+let activeManageCanteenCat = 'all';
+
+function filterManageCanteen() {
+  const q = (document.getElementById('adminCanteenSearch').value || '').toLowerCase().trim();
+  let count = 0;
+  document.querySelectorAll('.manage-canteen-row').forEach(row => {
+    const name = row.dataset.name || '';
+    const cat = row.dataset.cat || '';
+    const matchCat = (activeManageCanteenCat === 'all' || cat === activeManageCanteenCat);
+    const matchSearch = (!q || name.includes(q) || cat.includes(q));
+    if (matchCat && matchSearch) {
+      row.style.display = '';
+      count++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  const countEl = document.getElementById('manageCanteenCount');
+  if (countEl) {
+    countEl.textContent = (q || activeManageCanteenCat !== 'all') ? `Found ${count} matching products` : `Showing all ${count} items`;
+  }
+}
+
+function filterManageCanteenCat(cat, btn) {
+  activeManageCanteenCat = cat;
+  document.querySelectorAll('.canteen-cat-pill').forEach(b => {
+    b.classList.remove('btn-primary', 'active');
+    b.classList.add('btn-outline');
+  });
+  if (btn) {
+    btn.classList.remove('btn-outline');
+    btn.classList.add('btn-primary', 'active');
+  }
+  filterManageCanteen();
+}
+
+function openAddCanteenModal() {
+  document.getElementById('addCanteenForm').reset();
+  document.getElementById('addCanteenItemModal').classList.add('active');
+}
+
+function closeAddCanteenModal(e) {
+  if (e && e.target && e.target !== document.getElementById('addCanteenItemModal')) return;
+  document.getElementById('addCanteenItemModal').classList.remove('active');
+}
+
+function submitAddCanteenItem(e) {
+  e.preventDefault();
+  const name = document.getElementById('addCanteenName').value.trim();
+  const category = document.getElementById('addCanteenCategory').value;
+  const price = parseFloat(document.getElementById('addCanteenPrice').value);
+  const stock = parseInt(document.getElementById('addCanteenStock').value) || 100;
+
+  if (!name || isNaN(price) || price < 0) {
+    alert("Please enter a valid item name and non-negative price.");
+    return;
+  }
+
+  const btn = document.getElementById('btnAddCanteenSubmit');
+  btn.disabled = true;
+  btn.textContent = "Adding...";
+
+  fetch('/admin/canteen/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name, category: category, price: price, stock: stock })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert(res.message);
+      location.reload();
+    } else {
+      alert(res.message || "Failed to add item.");
+      btn.disabled = false;
+      btn.textContent = "Add to Canteen Menu";
+    }
+  })
+  .catch(err => {
+    alert("Network error: " + err);
+    btn.disabled = false;
+    btn.textContent = "Add to Canteen Menu";
+  });
+}
+
+function openEditCanteenModal(id, name, cat, price, stock) {
+  document.getElementById('editCanteenId').value = id;
+  document.getElementById('editCanteenIdDisplay').textContent = "Editing ID #" + id;
+  document.getElementById('editCanteenName').value = name;
+  document.getElementById('editCanteenCategory').value = cat;
+  document.getElementById('editCanteenPrice').value = price;
+  document.getElementById('editCanteenStock').value = stock;
+  document.getElementById('editCanteenItemModal').classList.add('active');
+}
+
+function closeEditCanteenModal(e) {
+  if (e && e.target && e.target !== document.getElementById('editCanteenItemModal')) return;
+  document.getElementById('editCanteenItemModal').classList.remove('active');
+}
+
+function submitEditCanteenItem(e) {
+  e.preventDefault();
+  const id = document.getElementById('editCanteenId').value;
+  const name = document.getElementById('editCanteenName').value.trim();
+  const category = document.getElementById('editCanteenCategory').value;
+  const price = parseFloat(document.getElementById('editCanteenPrice').value);
+  const stock = parseInt(document.getElementById('editCanteenStock').value) || 100;
+
+  if (!id || !name || isNaN(price) || price < 0) {
+    alert("Please enter a valid item name and non-negative price.");
+    return;
+  }
+
+  const btn = document.getElementById('btnEditCanteenSubmit');
+  btn.disabled = true;
+  btn.textContent = "Saving...";
+
+  fetch(`/admin/canteen/edit/${id}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name, category: category, price: price, stock: stock })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert(res.message);
+      location.reload();
+    } else {
+      alert(res.message || "Failed to alter item.");
+      btn.disabled = false;
+      btn.textContent = "Save Alterations";
+    }
+  })
+  .catch(err => {
+    alert("Network error: " + err);
+    btn.disabled = false;
+    btn.textContent = "Save Alterations";
+  });
+}
+
+function deleteCanteenItem(id, name) {
+  if (!confirm(`Are you sure you want to remove '${name}' from the Canteen Menu?`)) return;
+
+  fetch(`/admin/canteen/delete/${id}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) {
+      alert(res.message);
+      location.reload();
+    } else {
+      alert(res.message || "Failed to remove item.");
+    }
+  })
+  .catch(err => {
+    alert("Network error: " + err);
+  });
 }
 </script>
 {% endblock %}

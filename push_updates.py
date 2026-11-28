@@ -15,7 +15,7 @@ print("Staged files:", st.staged)
 
 commit_id = commit(
     repo,
-    message=b"feat: Add Admin customer lookup & directory, dynamic payment QR, and Google Maps Locate Us",
+    message=b"feat: Add Canteen item & pricing management for Admin/Partners, streamline dashboard headers",
     committer=b"Prakhar <runbhoomiboxcricketup@gmail.com>",
     author=b"Prakhar <runbhoomiboxcricketup@gmail.com>"
 )
